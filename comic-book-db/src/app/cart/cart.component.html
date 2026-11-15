@@ -1,0 +1,426 @@
+<div class="cart-container">
+  <h2>My Cart</h2>
+
+  <div *ngIf="loading">Loading…</div>
+  <div *ngIf="error" class="error-message">{{ error }}</div>
+
+  <div *ngIf="!loading && !cart" class="empty-cart">
+    Your cart is empty. <a routerLink="/selling">Browse comics</a> to start claiming.
+  </div>
+
+  <ng-container *ngIf="cart">
+    <!-- Expanded stepper: 4 steps (regular) or 5 steps (trade order).
+         Building/Submitted are driven by displayStep; Trade Received and Paid are driven
+         directly by cart.tradeReceived / isPaid so they always match the badges/buttons
+         below even if payment happens before the trade-in is marked received. -->
+    <ol class="stepper" aria-label="Order status">
+      <!-- Step 0: Building -->
+      <li class="stepper__step"
+          [class.is-done]="displayStep > 0"
+          [class.is-current]="displayStep === 0"
+          [class.is-upcoming]="false"
+          [attr.aria-current]="displayStep === 0 ? 'step' : null">
+        <span class="stepper__dot" aria-hidden="true">{{ displayStep > 0 ? '✓' : '1' }}</span>
+        <span class="stepper__label">Building</span>
+      </li>
+      <!-- Step 1: Submitted -->
+      <li class="stepper__step"
+          [class.is-done]="displayStep > 1"
+          [class.is-current]="displayStep === 1"
+          [class.is-upcoming]="displayStep < 1"
+          [attr.aria-current]="displayStep === 1 ? 'step' : null">
+        <span class="stepper__dot" aria-hidden="true">{{ displayStep > 1 ? '✓' : '2' }}</span>
+        <span class="stepper__label">Submitted</span>
+      </li>
+      <!-- Step 2 (trade only): Trade Received. Driven directly by cart.tradeReceived (not
+           displayStep) so it can never visually disagree with the Trade Received badge shown
+           in the submitted-panel below — e.g. if payment happens before the trade-in arrives. -->
+      <li *ngIf="hasTradeItem" class="stepper__step"
+          [class.is-done]="!!cart.tradeReceived"
+          [class.is-current]="cart.status === 'SUBMITTED' && !cart.tradeReceived"
+          [class.is-upcoming]="cart.status === 'OPEN'"
+          [attr.aria-current]="(cart.status === 'SUBMITTED' && !cart.tradeReceived) ? 'step' : null">
+        <span class="stepper__dot" aria-hidden="true">{{ cart.tradeReceived ? '✓' : '3' }}</span>
+        <span class="stepper__label">Trade Received</span>
+      </li>
+      <!-- Step 2/3: Paid. Driven directly by isPaid (not displayStep) so it can never visually
+           disagree with the "Paid ✓" button below — payment can happen before the trade-in is
+           marked received, and this step should reflect that immediately either way. -->
+      <li class="stepper__step"
+          [class.is-done]="isPaid"
+          [class.is-current]="!isPaid && cart.status === 'SUBMITTED'"
+          [class.is-upcoming]="cart.status === 'OPEN'"
+          [attr.aria-current]="(!isPaid && cart.status === 'SUBMITTED') ? 'step' : null">
+        <span class="stepper__dot" aria-hidden="true">{{ isPaid ? '✓' : (hasTradeItem ? '4' : '3') }}</span>
+        <span class="stepper__label">Paid</span>
+      </li>
+      <!-- Last step: Complete -->
+      <li class="stepper__step"
+          [class.is-current]="cart.status === 'FULFILLED'"
+          [class.is-upcoming]="cart.status !== 'FULFILLED'"
+          [attr.aria-current]="cart.status === 'FULFILLED' ? 'step' : null">
+        <span class="stepper__dot" aria-hidden="true">{{ hasTradeItem ? '5' : '4' }}</span>
+        <span class="stepper__label">Complete</span>
+      </li>
+    </ol>
+
+    <div class="cart-status" [ngClass]="'status-' + cart.status.toLowerCase()">
+      {{ statusLabel }}
+    </div>
+    <div *ngIf="cart.invoiceNumber" class="invoice-number">Order #{{ cart.invoiceNumber }}</div>
+
+    <table *ngIf="visibleItems.length > 0">
+      <thead>
+        <tr>
+          <th>Comic</th>
+          <th>Price</th>
+          <th>Claimed At</th>
+          <th *ngIf="canRemove()"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngFor="let row of groupedRows; trackBy: trackByRow">
+          <!-- Trade credit row -->
+          <tr *ngIf="row.type === 'single' && row.isTrade" class="trade-credit-row">
+            <td>
+              <a [routerLink]="['/detail', row.items[0].comicId]">
+                {{ row.items[0].comicTitle }}{{ row.items[0].comicNumber ? ' ' + row.items[0].comicNumber : '' }}
+              </a>
+              <span *ngIf="row.items[0].offeredGrade != null" class="trade-offered-grade">Grade {{ row.items[0].offeredGrade | number:'1.1-1' }}</span>
+              <span class="trade-badge">TRADE CREDIT</span>
+            </td>
+            <td class="trade-credit-price">{{ row.items[0].price | currency }}</td>
+            <td>{{ row.claimedAt | date:'short' }}</td>
+            <td *ngIf="canRemove()">
+              <button class="btn-release" (click)="removeItem(row.removeId)">Remove</button>
+            </td>
+          </tr>
+          <!-- Single comic: one row -->
+          <tr *ngIf="row.type === 'single' && !row.isTrade"
+              [class.graded-row]="row.isGraded">
+            <td>
+              <a [routerLink]="['/detail', row.items[0].comicId]">
+                {{ row.items[0].comicTitle }}{{ row.items[0].comicNumber ? ' ' + row.items[0].comicNumber : '' }}
+              </a>
+            </td>
+            <td>
+              <ng-container *ngIf="showItemDiscounts; else plainPrice">
+                <span class="price-original">{{ row.items[0].price | currency }}</span>
+                <span *ngIf="discountedItemPrice(row.items[0]) === 0" class="price-free-badge">FREE</span>
+                <span *ngIf="discountedItemPrice(row.items[0]) !== 0" class="price-discounted">{{ discountedItemPrice(row.items[0]) | currency }}</span>
+              </ng-container>
+              <ng-template #plainPrice>{{ row.items[0].price | currency }}</ng-template>
+            </td>
+            <td>{{ row.claimedAt | date:'short' }}</td>
+            <td *ngIf="canRemove()">
+              <button class="btn-release" (click)="removeItem(row.removeId)">Release</button>
+            </td>
+          </tr>
+          <!-- Set: header row (title + date + release) then one row per member comic -->
+          <ng-container *ngIf="row.type === 'set'">
+            <tr class="set-header-row"
+                [class.graded-row]="row.isGraded">
+              <td>
+                <a class="set-header-link" [routerLink]="['/set', row.containerId ?? row.items[0].comicId]">
+                  {{ row.containerTitle ?? row.items[0].comicTitle }}
+                </a>
+                <span class="set-tag">Set {{ row.collectionGroup }}</span>
+              </td>
+              <td class="set-total-price">
+                <ng-container *ngIf="showItemDiscounts">
+                  <span class="price-original">{{ row.totalPrice | currency }}</span>
+                  <span class="price-discounted">{{ discountedSetTotal(row) | currency }}</span>
+                </ng-container>
+                <span *ngIf="!showItemDiscounts">{{ row.totalPrice | currency }}</span>
+              </td>
+              <td>{{ row.claimedAt | date:'short' }}</td>
+              <td *ngIf="canRemove()">
+                <button class="btn-release" (click)="removeItem(row.removeId)">Release</button>
+              </td>
+            </tr>
+            <tr *ngFor="let comic of row.items; trackBy: trackByComicId"
+                class="set-member-row"
+                [class.graded-row]="comic.isGraded">
+              <td class="set-member-comic">
+                <a [routerLink]="['/detail', comic.comicId]">
+                  {{ comic.comicTitle }}{{ comic.comicNumber ? ' ' + comic.comicNumber : '' }}
+                </a>
+              </td>
+              <td class="set-member-price">
+                <ng-container *ngIf="showItemDiscounts">
+                  <span class="price-original">{{ comic.price | currency }}</span>
+                  <span *ngIf="discountedItemPrice(comic) === 0" class="price-free-badge">FREE</span>
+                  <span *ngIf="discountedItemPrice(comic) !== 0" class="price-discounted">{{ discountedItemPrice(comic) | currency }}</span>
+                </ng-container>
+                <span *ngIf="!showItemDiscounts">{{ comic.price | currency }}</span>
+              </td>
+              <td></td>
+              <td *ngIf="canRemove()"></td>
+            </tr>
+          </ng-container>
+        </ng-container>
+      </tbody>
+      <tfoot>
+        <tr *ngIf="cart.status !== 'OPEN' || shippingAmount > 0 || (cart.discountAmount ?? 0) > 0">
+          <td>Subtotal <span class="item-count-label">({{ visibleItems.length }} book{{ visibleItems.length !== 1 ? 's' : '' }})</span></td>
+          <td>{{ cartTotal | currency }}</td>
+          <td></td>
+          <td *ngIf="canRemove()"></td>
+        </tr>
+        <tr *ngIf="cart.discountAmount && cart.discountAmount > 0">
+          <td>Discount</td>
+          <td class="discount-savings">-{{ cart.discountAmount | currency }}
+            <span *ngIf="cart.discountDescription" class="discount-desc">({{ cart.discountDescription }})</span>
+          </td>
+          <td></td>
+          <td *ngIf="canRemove()"></td>
+        </tr>
+        <tr *ngIf="cart.freeShippingApplied">
+          <td>Shipping</td>
+          <td class="shipping-free">FREE</td>
+          <td></td>
+          <td *ngIf="canRemove()"></td>
+        </tr>
+        <tr *ngIf="!cart.freeShippingApplied && cart.shippingEstimate?.isFree">
+          <td>Shipping <span class="shipping-note">(estimate)</span></td>
+          <td class="shipping-free">FREE</td>
+          <td></td>
+          <td *ngIf="canRemove()"></td>
+        </tr>
+        <tr *ngIf="shippingAmount > 0 && !cart.freeShippingApplied && !cart.shippingEstimate?.isFree">
+          <td>Shipping</td>
+          <td class="shipping-cost">
+            {{ shippingAmount | currency }}
+            <span *ngIf="cart.shippingEstimate?.notes" class="shipping-note">{{ cart.shippingEstimate?.notes }}</span>
+          </td>
+          <td></td>
+          <td *ngIf="canRemove()"></td>
+        </tr>
+        <tr class="grand-total-row">
+          <td><strong>Total ({{ visibleItems.length }})</strong></td>
+          <td><strong>{{ discountedTotal | currency }}</strong></td>
+          <td></td>
+          <td *ngIf="canRemove()"></td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <div *ngIf="visibleItems.length === 0" class="empty-cart">
+      Your cart is empty. <a routerLink="/selling">Browse comics</a> to start claiming.
+    </div>
+
+    <!-- Panel A: trade order, trade NOT yet received -->
+    <div class="cart-actions submitted-panel"
+         *ngIf="cart.status === 'SUBMITTED' && hasTradeItem && !cart.tradeReceived">
+      <p class="submitted-heading">
+        Submitted — ship your trade-in. Order fulfillment won't occur until we confirm receipt of trade-in. I will try
+         to send the return shipment as soon as I possibly can.  A 1-2 day turnaround.
+      </p>
+      <div class="trade-ship-to">
+        <p class="notes-label">Please ship your trade item to:</p>
+        <address class="store-address">
+          Lightning Comics Rocks!<br>
+          123 Main St. #100<br>
+          Anytown, ST 12345-0000
+        </address>
+      </div>
+      <div class="checkout-button-row">
+        <button class="btn-shipping"
+                [class.btn-shipping--done]="!!cart.shippingAddress"
+                (click)="showShippingModal = true">
+          {{ cart.shippingAddress ? '✓ Shipping' : 'Shipping' }}
+        </button>
+        <button class="btn-square-pay"
+                [disabled]="isPaid || venmoNotified"
+                (click)="showPaymentModal = true">
+          {{ isPaid ? 'Paid ✓' : 'Pay by Card' }}
+        </button>
+        <button class="btn-venmo-pay"
+                [disabled]="isPaid || venmoNotified"
+                (click)="showVenmoModal = true">
+          {{ venmoNotified ? 'Venmo Sent ✓' : 'Pay by Venmo' }}
+        </button>
+      </div>
+      <button class="btn-unsubmit" [disabled]="isPaid || venmoNotified" (click)="unsubmit()">UnSubmit Order</button>
+    </div>
+
+    <!-- Panel B: trade order, trade received -->
+    <div class="cart-actions submitted-panel"
+         *ngIf="cart.status === 'SUBMITTED' && hasTradeItem && cart.tradeReceived">
+      <p class="submitted-heading">
+        Your trade-in has been received. Complete checkout below.
+      </p>
+      <span class="trade-received-badge">Trade Received ✓</span>
+      <div class="checkout-button-row">
+        <button class="btn-shipping"
+                [class.btn-shipping--done]="!!cart.shippingAddress"
+                (click)="showShippingModal = true">
+          {{ cart.shippingAddress ? '✓ Shipping' : 'Shipping' }}
+        </button>
+        <button class="btn-square-pay"
+                [disabled]="isPaid || venmoNotified"
+                (click)="showPaymentModal = true">
+          {{ isPaid ? 'Paid ✓' : 'Pay by Card' }}
+        </button>
+        <button class="btn-venmo-pay"
+                [disabled]="isPaid || venmoNotified"
+                (click)="showVenmoModal = true">
+          {{ venmoNotified ? 'Venmo Sent ✓' : 'Pay by Venmo' }}
+        </button>
+      </div>
+      <button class="btn-unsubmit" [disabled]="isPaid || venmoNotified" (click)="unsubmit()">UnSubmit Order</button>
+    </div>
+
+    <!-- Panel C: regular order, no trade -->
+    <div class="cart-actions submitted-panel"
+         *ngIf="cart.status === 'SUBMITTED' && !hasTradeItem">
+      <p class="submitted-heading">
+        Your order has been submitted. Complete checkout below.
+      </p>
+      <div class="checkout-button-row">
+        <button class="btn-shipping"
+                [class.btn-shipping--done]="!!cart.shippingAddress"
+                (click)="showShippingModal = true">
+          {{ cart.shippingAddress ? '✓ Shipping' : 'Shipping' }}
+        </button>
+        <button class="btn-square-pay"
+                [disabled]="isPaid || venmoNotified"
+                (click)="showPaymentModal = true">
+          {{ isPaid ? 'Paid ✓' : 'Pay by Card' }}
+        </button>
+        <button class="btn-venmo-pay"
+                [disabled]="isPaid || venmoNotified"
+                (click)="showVenmoModal = true">
+          {{ venmoNotified ? 'Venmo Sent ✓' : 'Pay by Venmo' }}
+        </button>
+      </div>
+      <button class="btn-unsubmit" [disabled]="isPaid || venmoNotified" (click)="unsubmit()">UnSubmit Order</button>
+    </div>
+
+    <div class="cart-actions balance-warning" *ngIf="cart.status === 'OPEN' && balanceNegative">
+      <p>Your trade credit exceeds the cart total. Add more comics or remove the trade-in to submit.</p>
+    </div>
+
+    <div class="cart-actions balance-warning" *ngIf="cart.status === 'SUBMITTED' && balanceNegative">
+      <p>Your trade credit exceeds the order total. Please contact the seller to resolve your balance.</p>
+    </div>
+
+    <div class="cart-actions" *ngIf="canSubmit()">
+      <p class="submit-note">
+        Ready to order? You can still remove items after submitting, but not add new ones.
+      </p>
+      <p *ngIf="hasTradeItem" class="submit-note trade-submit-note">
+        After submitting, you will need to ship your trade-in comic to us. We will fulfill your order once it arrives.
+      </p>
+      <div class="notes-group">
+        <label for="customerNotes" class="notes-label">Notes for seller <span class="notes-optional">(optional)</span></label>
+        <textarea id="customerNotes" class="notes-textarea" rows="3"
+                  [(ngModel)]="customerNotes"
+                  placeholder="e.g. shipping preferences, payment method, questions…"></textarea>
+      </div>
+      <button class="btn-submit" (click)="submitOrder()" [disabled]="submitting">
+        {{ submitting ? 'Submitting…' : 'Submit Order' }}
+      </button>
+    </div>
+
+    <div class="cart-actions customer-notes-display" *ngIf="cart.customerNotes && cart.status !== 'OPEN'">
+      <p class="notes-label">Your notes:</p>
+      <p class="notes-value">{{ cart.customerNotes }}</p>
+    </div>
+
+    <div class="cart-actions shipping-address-display" *ngIf="cart.shippingAddress && cart.status !== 'OPEN'">
+      <p class="notes-label">Ship to:</p>
+      <p class="notes-value">
+        {{ cart.userName }}<br>
+        {{ cart.shippingAddress.street1 }}<br>
+        <ng-container *ngIf="cart.shippingAddress.street2">{{ cart.shippingAddress.street2 }}<br></ng-container>
+        {{ cart.shippingAddress.city }}, {{ cart.shippingAddress.state }} {{ cart.shippingAddress.zip }}
+        <ng-container *ngIf="cart.shippingAddress.phone"><br>{{ cart.shippingAddress.phone }}</ng-container>
+      </p>
+    </div>
+
+    <div class="cart-actions seller-notes-display" *ngIf="cart.adminNotes">
+      <p class="notes-label">Seller notes:</p>
+      <p class="notes-value">{{ cart.adminNotes }}</p>
+    </div>
+  </ng-container>
+
+  <!-- Payment success banner -->
+  <div class="cart-actions payment-success-banner" *ngIf="isPaid">
+    Payment received — thank you! The seller has been notified.
+  </div>
+
+  <!-- Shipping address modal -->
+  <app-shipping-modal
+    *ngIf="showShippingModal && cart"
+    [cart]="cart"
+    (saved)="onShippingAddressSaved($event)"
+    (closed)="showShippingModal = false">
+  </app-shipping-modal>
+
+  <!-- Square payment modal -->
+  <app-square-payment-modal
+    *ngIf="showPaymentModal"
+    [amountDollars]="discountedTotal"
+    (paid)="onPaymentComplete()"
+    (closed)="showPaymentModal = false">
+  </app-square-payment-modal>
+
+  <!-- Venmo payment modal -->
+  <app-venmo-payment-modal
+    *ngIf="showVenmoModal && cart"
+    [amountDollars]="discountedTotal"
+    [invoiceNumber]="cart.invoiceNumber ?? ''"
+    (sent)="onVenmoSent($event)"
+    (closed)="showVenmoModal = false">
+  </app-venmo-payment-modal>
+
+  <!-- Release confirmation modal -->
+  <div class="modal-backdrop modal-overlay" *ngIf="confirmModal" (click)="cancelRelease()">
+    <div class="modal-box modal" role="dialog" aria-modal="true"
+         aria-labelledby="cart-release-modal-title"
+         (click)="$event.stopPropagation()">
+      <h3 id="cart-release-modal-title" class="modal-title modal__title">
+        {{ confirmModal.isSet ? 'Release Set?' : 'Release Book?' }}
+      </h3>
+      <p class="modal-body modal__body">
+        <ng-container *ngIf="confirmModal.isSet">
+          <strong>{{ confirmModal.title }}</strong> contains
+          <strong>{{ confirmModal.bookCount }} book{{ confirmModal.bookCount !== 1 ? 's' : '' }}</strong>.
+          <ng-container *ngIf="confirmModal.isFinalizing">
+            Releasing it will remove all {{ confirmModal.bookCount }} books from your submitted order.
+          </ng-container>
+          <ng-container *ngIf="!confirmModal.isFinalizing">
+            All {{ confirmModal.bookCount }} books will be returned to available.
+          </ng-container>
+        </ng-container>
+        <ng-container *ngIf="!confirmModal.isSet">
+          Are you sure you want to remove <strong>{{ confirmModal.title }}</strong> from your submitted order?
+        </ng-container>
+      </p>
+      <div class="modal-actions modal__actions">
+        <button class="modal-btn-cancel" (click)="cancelRelease()">Cancel</button>
+        <button class="modal-btn-confirm" (click)="confirmRelease()">{{ confirmModal.isSet ? 'Release Set' : 'Release Book' }}</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Unsubmit warning modal (trade order, trade-in not yet marked received) -->
+  <div class="modal-backdrop modal-overlay" *ngIf="showUnsubmitWarning" (click)="cancelUnsubmit()">
+    <div class="modal-box modal modal--sm" role="dialog" aria-modal="true"
+         aria-labelledby="unsubmit-warning-title"
+         (click)="$event.stopPropagation()">
+      <h3 id="unsubmit-warning-title" class="modal-title modal__title">Unsubmit Order?</h3>
+      <p class="modal-body modal__body">
+        If you've already mailed your trade-in comic to us, unsubmitting will revert this order to
+        Building and it may no longer match what's in transit. Only unsubmit if you haven't shipped
+        your trade-in yet.
+      </p>
+      <div class="modal-actions modal__actions">
+        <button class="modal-btn-cancel" (click)="cancelUnsubmit()">Cancel</button>
+        <button class="modal-btn-confirm" (click)="confirmUnsubmit()">Unsubmit Anyway</button>
+      </div>
+    </div>
+  </div>
+
+</div>

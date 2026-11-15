@@ -1,0 +1,14 @@
+<div class="filter-row">
+  <input
+    id="filter-box"
+    [(ngModel)]="filterTerm"
+    placeholder="Filter by title..."
+    (keyup.enter)="applyFilter()"
+  />
+  <button class="btn-filter" (click)="applyFilter()" [disabled]="!filterTerm.trim()">
+    Filter
+  </button>
+  <button *ngIf="isApplied" class="btn-clear" (click)="clearFilter()">
+    Clear
+  </button>
+</div>

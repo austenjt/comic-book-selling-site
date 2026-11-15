@@ -1,0 +1,600 @@
+<div class="orders-container">
+  <h2>Active Orders</h2>
+
+  <div *ngIf="fulfilledCartId" class="success-message">Order marked as fulfilled.</div>
+  <div *ngIf="error" class="error-message">{{ error }}</div>
+  <div *ngIf="loading">Loading…</div>
+  <div *ngIf="!loading && orders.length === 0 && !error">No active orders.</div>
+
+  <div *ngFor="let order of orders; trackBy: trackByOrderId" class="order-card">
+    <div class="order-header">
+      <div class="order-buyer">
+        <strong>{{ order.userName }}</strong>
+        <span class="buyer-email">{{ order.userEmail }}</span>
+      </div>
+      <div class="order-meta">
+        <span class="order-status" [ngClass]="'status-' + order.status.toLowerCase()">
+          {{ statusLabel(order.status) }}
+        </span>
+        <span *ngIf="hasTradeItem(order)" class="trade-order-badge"
+              [class.trade-order-badge--received]="order.tradeReceived">
+          {{ order.tradeReceived ? 'Trade Received ✓' : 'Trade Order' }}
+        </span>
+        <span *ngIf="order.paymentMethod === 'VENMO' && order.paymentStatus !== 'PAID'" class="venmo-pending-badge">
+          Venmo Sent — Verify
+        </span>
+        <span *ngIf="order.invoiceNumber" class="order-invoice">Order #{{ order.invoiceNumber }}</span>
+        <span class="order-date">Opened: {{ order.createdAt | date:'short' }}</span>
+        <span *ngIf="order.finalizedAt" class="order-date">Finalized: {{ order.finalizedAt | date:'short' }}</span>
+      </div>
+    </div>
+
+    <ol class="stepper stepper--compact" aria-label="Order status">
+      <li class="stepper__step"
+          [class.is-done]="displayStep(order) > 0"
+          [class.is-current]="displayStep(order) === 0"
+          [attr.aria-current]="displayStep(order) === 0 ? 'step' : null">
+        <span class="stepper__dot" aria-hidden="true">{{ displayStep(order) > 0 ? '✓' : '1' }}</span>
+        <span class="stepper__label">Building</span>
+      </li>
+      <li class="stepper__step"
+          [class.is-done]="displayStep(order) > 1"
+          [class.is-current]="displayStep(order) === 1"
+          [class.is-upcoming]="displayStep(order) < 1"
+          [attr.aria-current]="displayStep(order) === 1 ? 'step' : null">
+        <span class="stepper__dot" aria-hidden="true">{{ displayStep(order) > 1 ? '✓' : '2' }}</span>
+        <span class="stepper__label">Submitted</span>
+      </li>
+      <li *ngIf="hasTradeItem(order)" class="stepper__step"
+          [class.is-done]="displayStep(order) > 2"
+          [class.is-current]="displayStep(order) === 2"
+          [class.is-upcoming]="displayStep(order) < 2"
+          [attr.aria-current]="displayStep(order) === 2 ? 'step' : null">
+        <span class="stepper__dot" aria-hidden="true">{{ displayStep(order) > 2 ? '✓' : '3' }}</span>
+        <span class="stepper__label">Trade Received</span>
+      </li>
+      <li class="stepper__step"
+          [class.is-done]="displayStep(order) > (hasTradeItem(order) ? 3 : 2)"
+          [class.is-current]="displayStep(order) === (hasTradeItem(order) ? 3 : 2)"
+          [class.is-upcoming]="displayStep(order) < (hasTradeItem(order) ? 3 : 2)"
+          [attr.aria-current]="displayStep(order) === (hasTradeItem(order) ? 3 : 2) ? 'step' : null">
+        <span class="stepper__dot" aria-hidden="true">{{ displayStep(order) > (hasTradeItem(order) ? 3 : 2) ? '✓' : (hasTradeItem(order) ? '4' : '3') }}</span>
+        <span class="stepper__label">Paid</span>
+      </li>
+      <li class="stepper__step"
+          [class.is-current]="order.status === 'FULFILLED'"
+          [class.is-upcoming]="order.status !== 'FULFILLED'"
+          [attr.aria-current]="order.status === 'FULFILLED' ? 'step' : null">
+        <span class="stepper__dot" aria-hidden="true">{{ hasTradeItem(order) ? '5' : '4' }}</span>
+        <span class="stepper__label">Complete</span>
+      </li>
+    </ol>
+
+    <table>
+      <thead>
+        <tr><th>Comic</th><th>Price</th><th>Claimed</th><th></th></tr>
+      </thead>
+      <tbody>
+        <ng-container *ngFor="let row of groupedRows(order); trackBy: trackByRow">
+          <!-- Trade credit row -->
+          <tr *ngIf="row.type === 'single' && row.isTrade" class="trade-credit-row">
+            <td>
+              <a [routerLink]="['/detail', row.items[0].comicId]">{{ row.items[0].comicTitle }}{{ row.items[0].comicNumber ? ' ' + row.items[0].comicNumber : '' }}</a>
+              <span *ngIf="row.items[0].offeredGrade != null" class="trade-offered-grade">Grade {{ row.items[0].offeredGrade | number:'1.1-1' }}</span>
+              <span class="trade-badge">TRADE CREDIT</span>
+            </td>
+            <td class="trade-credit-price">{{ row.items[0].price | currency }}</td>
+            <td>{{ row.claimedAt | date:'short' }}</td>
+            <td>
+              <button class="btn-release" (click)="unclaim(row.removeId)"
+                title="Release this trade item">Release</button>
+            </td>
+          </tr>
+          <!-- Single comic: one row -->
+          <tr *ngIf="row.type === 'single' && !row.isTrade"
+              [class.graded-row]="row.isGraded">
+            <td><a [routerLink]="['/detail', row.items[0].comicId]">{{ row.items[0].comicTitle }}{{ row.items[0].comicNumber ? ' ' + row.items[0].comicNumber : '' }}</a></td>
+            <td>
+              <ng-container *ngIf="showItemDiscounts(order); else plainOrderPrice">
+                <span class="price-original">{{ row.items[0].price | currency }}</span>
+                <span *ngIf="discountedItemPrice(row.items[0], order) === 0" class="price-free-badge">FREE</span>
+                <span *ngIf="discountedItemPrice(row.items[0], order) !== 0" class="price-discounted">{{ discountedItemPrice(row.items[0], order) | currency }}</span>
+              </ng-container>
+              <ng-template #plainOrderPrice>{{ row.items[0].price | currency }}</ng-template>
+            </td>
+            <td>{{ row.claimedAt | date:'short' }}</td>
+            <td>
+              <button class="btn-release" (click)="unclaim(row.removeId)"
+                title="Release this comic back to available">Release</button>
+            </td>
+          </tr>
+          <!-- Set: header row then one row per member comic -->
+          <ng-container *ngIf="row.type === 'set'">
+            <tr class="set-header-row"
+                [class.graded-row]="row.isGraded">
+              <td>
+                <a class="set-header-link" [routerLink]="['/set', row.containerId ?? row.items[0].comicId]">{{ row.containerTitle ?? row.items[0].comicTitle }}</a>
+                <span class="set-tag">Set {{ row.collectionGroup }}</span>
+              </td>
+              <td class="set-total-price">
+                <ng-container *ngIf="showItemDiscounts(order)">
+                  <span class="price-original">{{ row.totalPrice | currency }}</span>
+                  <span class="price-discounted">{{ discountedSetTotal(row, order) | currency }}</span>
+                </ng-container>
+                <span *ngIf="!showItemDiscounts(order)">{{ row.totalPrice | currency }}</span>
+              </td>
+              <td>{{ row.claimedAt | date:'short' }}</td>
+              <td>
+                <button class="btn-release" (click)="openAdminReleaseConfirm(row)"
+                  title="Release this set back to available">Release Set</button>
+              </td>
+            </tr>
+            <tr *ngFor="let comic of row.items; trackBy: trackByComicId"
+                class="set-member-row"
+                [class.graded-row]="comic.isGraded">
+              <td class="set-member-comic">
+                <a [routerLink]="['/detail', comic.comicId]">{{ comic.comicTitle }}{{ comic.comicNumber ? ' ' + comic.comicNumber : '' }}</a>
+              </td>
+              <td class="set-member-price">
+                <ng-container *ngIf="showItemDiscounts(order); else plainSetMemberPrice">
+                  <span class="price-original">{{ comic.price | currency }}</span>
+                  <span *ngIf="discountedItemPrice(comic, order) === 0" class="price-free-badge">FREE</span>
+                  <span *ngIf="discountedItemPrice(comic, order) !== 0" class="price-discounted">{{ discountedItemPrice(comic, order) | currency }}</span>
+                </ng-container>
+                <ng-template #plainSetMemberPrice>{{ comic.price | currency }}</ng-template>
+              </td>
+              <td></td>
+              <td></td>
+            </tr>
+          </ng-container>
+        </ng-container>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td>Subtotal <span class="item-count-label">({{ visibleCartItems(order).length }} book{{ visibleCartItems(order).length !== 1 ? 's' : '' }})</span></td>
+          <td>{{ cartTotal(order) | currency }}</td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr *ngIf="order.discountAmount && order.discountAmount > 0">
+          <td>Discount</td>
+          <td class="discount-savings">-{{ order.discountAmount | currency }}
+            <span *ngIf="order.discountDescription" class="discount-desc">({{ order.discountDescription }})</span>
+          </td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr *ngIf="order.shippingCost && order.shippingCost > 0">
+          <td>Shipping</td>
+          <td>{{ order.shippingCost | currency }}</td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><strong>Total</strong></td>
+          <td><strong>{{ orderDiscountedTotal(order) | currency }}</strong></td>
+          <td></td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <div *ngIf="order.customerNotes" class="order-notes customer-notes">
+      <span class="notes-heading">Customer notes:</span> {{ order.customerNotes }}
+    </div>
+
+    <div *ngIf="order.shippingAddress" class="order-notes shipping-address-note">
+      <span class="notes-heading">Ship to:</span>
+      <span class="saved-note-text">
+        {{ order.userName }},
+        {{ order.shippingAddress.street1 }}{{ order.shippingAddress.street2 ? ', ' + order.shippingAddress.street2 : '' }},
+        {{ order.shippingAddress.city }}, {{ order.shippingAddress.state }} {{ order.shippingAddress.zip }}
+        <ng-container *ngIf="order.shippingAddress.phone"> · {{ order.shippingAddress.phone }}</ng-container>
+      </span>
+    </div>
+
+    <div class="order-notes admin-notes-row">
+      <span class="notes-heading">Seller notes:</span>
+      <ng-container *ngIf="!isNotesEditing(order.id, order.adminNotes)">
+        <span class="saved-note-text">{{ order.adminNotes }}</span>
+        <button type="button" class="btn-edit-note" (click)="notesEditing[order.id] = true">Edit</button>
+      </ng-container>
+      <ng-container *ngIf="isNotesEditing(order.id, order.adminNotes)">
+        <textarea class="admin-notes-textarea"
+                  rows="2"
+                  placeholder="Notes visible to customer…"
+                  [value]="initNoteDraft(order.id, order.adminNotes)"
+                  (input)="adminNoteDrafts[order.id] = $any($event.target).value"></textarea>
+        <button type="button" class="btn-save-notes" (click)="saveAdminNotes(order.id)">Save</button>
+      </ng-container>
+    </div>
+
+    <div *ngIf="order.shipped" class="order-notes tracking-note-row">
+      <span class="notes-heading">Tracking #:</span>
+      <ng-container *ngIf="!isTrackingEditing(order.id, order.trackingNumber)">
+        <span class="saved-note-text">{{ order.trackingNumber }}</span>
+        <button type="button" class="btn-edit-note" (click)="trackingEditing[order.id] = true">Edit</button>
+      </ng-container>
+      <ng-container *ngIf="isTrackingEditing(order.id, order.trackingNumber)">
+        <input type="text" class="tracking-input"
+               placeholder="Tracking number (optional)"
+               [value]="initTrackingDraft(order.id, order.trackingNumber)"
+               (input)="trackingDrafts[order.id] = $any($event.target).value">
+        <button type="button" class="btn-save-notes" (click)="saveTracking(order)">Save</button>
+      </ng-container>
+    </div>
+
+    <div class="order-actions">
+      <div class="fulfillment-checks">
+        <label class="fulfillment-check-label" [class.check-active]="order.paymentStatus === 'PAID'">
+          <input type="checkbox" [checked]="order.paymentStatus === 'PAID'" (change)="togglePaid(order)">
+          Paid
+        </label>
+        <label class="fulfillment-check-label" [class.check-active]="order.shipped">
+          <input type="checkbox" [checked]="order.shipped" (change)="toggleShipped(order)">
+          Shipped
+        </label>
+      </div>
+      <button *ngIf="hasTradeItem(order) && !order.tradeReceived"
+        class="btn-mark-trade-received"
+        [disabled]="markingTradeReceivedId === order.id"
+        (click)="markTradeReceived(order)"
+        title="Confirm that the trade-in comic has been received — required before fulfillment">
+        {{ markingTradeReceivedId === order.id ? 'Marking…' : 'Mark Trade Received' }}
+      </button>
+      <button
+        class="btn-refresh-discounts"
+        [disabled]="refreshingDiscountsId === order.id"
+        (click)="refreshDiscounts(order)"
+        title="Recompute discounts on this order with the current rules and re-send the order email">
+        {{ refreshingDiscountsId === order.id ? 'Refreshing…' : 'Refresh Discounts' }}
+      </button>
+      <button
+        class="btn-unsubmit"
+        (click)="unsubmit(order)"
+        title="Revert this order to Open so the user can add more items">
+        UnSubmit
+      </button>
+      <button
+        class="btn-fulfill"
+        [class.btn-fulfill-confirm]="pendingFulfillId === order.id"
+        [disabled]="!canFulfill(order) || fulfillingId === order.id"
+        (click)="fulfill(order)"
+        [title]="fulfillTitle(order)">
+        {{ fulfillingId === order.id ? 'Fulfilling…' : pendingFulfillId === order.id ? 'Confirm Fulfill?' : 'Mark as Fulfilled' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Open Shopping Carts -->
+  <div class="section-divider"></div>
+  <h2>Open Shopping Carts</h2>
+
+  <div *ngIf="loadingOpen">Loading…</div>
+  <div *ngIf="openCartsError" class="error-message">{{ openCartsError }}</div>
+  <div *ngIf="!loadingOpen && !openCartsError && openCarts.length === 0">No open shopping carts.</div>
+
+  <div *ngFor="let cart of openCarts; trackBy: trackByOrderId" class="order-card open-cart-card">
+    <div class="order-header">
+      <div class="order-buyer">
+        <strong>{{ cart.userName }}</strong>
+        <span class="buyer-email">{{ cart.userEmail }}</span>
+      </div>
+      <div class="order-meta">
+        <span class="order-status status-open">Open</span>
+        <span class="order-date">Since: {{ cart.createdAt | date:'short' }}</span>
+        <span class="order-date">{{ cart.items.length }} item{{ cart.items.length !== 1 ? 's' : '' }}</span>
+      </div>
+    </div>
+
+    <!-- Open carts are always at stage 1. -->
+    <ol class="stepper stepper--compact" aria-label="Order status">
+      <li class="stepper__step is-current" aria-current="step">
+        <span class="stepper__dot" aria-hidden="true">1</span>
+        <span class="stepper__label">Open</span>
+      </li>
+      <li class="stepper__step is-upcoming">
+        <span class="stepper__dot" aria-hidden="true">2</span>
+        <span class="stepper__label">Submitted</span>
+      </li>
+      <li class="stepper__step is-upcoming">
+        <span class="stepper__dot" aria-hidden="true">3</span>
+        <span class="stepper__label">Fulfilled</span>
+      </li>
+    </ol>
+
+    <table>
+      <thead>
+        <tr><th>Comic</th><th>Price</th><th>Claimed</th><th></th></tr>
+      </thead>
+      <tbody>
+        <ng-container *ngFor="let row of groupedRows(cart); trackBy: trackByRow">
+          <!-- Trade credit row -->
+          <tr *ngIf="row.type === 'single' && row.isTrade" class="trade-credit-row">
+            <td>
+              <a [routerLink]="['/detail', row.items[0].comicId]">{{ row.items[0].comicTitle }}{{ row.items[0].comicNumber ? ' ' + row.items[0].comicNumber : '' }}</a>
+              <span *ngIf="row.items[0].offeredGrade != null" class="trade-offered-grade">Grade {{ row.items[0].offeredGrade | number:'1.1-1' }}</span>
+              <span class="trade-badge">TRADE CREDIT</span>
+            </td>
+            <td class="trade-credit-price">{{ row.items[0].price | currency }}</td>
+            <td>{{ row.claimedAt | date:'short' }}</td>
+            <td>
+              <button class="btn-release" (click)="unclaim(row.removeId)"
+                title="Release this trade item">Release</button>
+            </td>
+          </tr>
+          <!-- Single comic: one row -->
+          <tr *ngIf="row.type === 'single' && !row.isTrade"
+              [class.graded-row]="row.isGraded">
+            <td><a [routerLink]="['/detail', row.items[0].comicId]">{{ row.items[0].comicTitle }}{{ row.items[0].comicNumber ? ' ' + row.items[0].comicNumber : '' }}</a></td>
+            <td>{{ row.items[0].price | currency }}</td>
+            <td>{{ row.claimedAt | date:'short' }}</td>
+            <td>
+              <button class="btn-release" (click)="unclaim(row.removeId)"
+                title="Release this comic back to available">Release</button>
+            </td>
+          </tr>
+          <!-- Set: header row then one row per member comic -->
+          <ng-container *ngIf="row.type === 'set'">
+            <tr class="set-header-row"
+                [class.graded-row]="row.isGraded">
+              <td>
+                <a class="set-header-link" [routerLink]="['/set', row.containerId ?? row.items[0].comicId]">{{ row.containerTitle ?? row.items[0].comicTitle }}</a>
+                <span class="set-tag">Set {{ row.collectionGroup }}</span>
+              </td>
+              <td class="set-total-price">{{ row.totalPrice | currency }}</td>
+              <td>{{ row.claimedAt | date:'short' }}</td>
+              <td>
+                <button class="btn-release" (click)="openAdminReleaseConfirm(row)"
+                  title="Release this set back to available">Release Set</button>
+              </td>
+            </tr>
+            <tr *ngFor="let comic of row.items; trackBy: trackByComicId"
+                class="set-member-row"
+                [class.graded-row]="comic.isGraded">
+              <td class="set-member-comic">
+                <a [routerLink]="['/detail', comic.comicId]">{{ comic.comicTitle }}{{ comic.comicNumber ? ' ' + comic.comicNumber : '' }}</a>
+              </td>
+              <td class="set-member-price">{{ comic.price | currency }}</td>
+              <td></td>
+              <td></td>
+            </tr>
+          </ng-container>
+        </ng-container>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td>Subtotal <span class="item-count-label">({{ visibleCartItems(cart).length }} book{{ visibleCartItems(cart).length !== 1 ? 's' : '' }})</span></td>
+          <td>{{ cartTotal(cart) | currency }}</td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr *ngIf="(cart.discountAmount ?? 0) > 0">
+          <td>Discount</td>
+          <td colspan="2" style="color:#2e7d32">-{{ cart.discountAmount | currency }}
+            <span *ngIf="cart.discountDescription" style="font-size:0.85em;color:#555;margin-left:0.4rem">({{ cart.discountDescription }})</span>
+          </td>
+          <td></td>
+        </tr>
+        <tr *ngIf="cart.shippingCost && cart.shippingCost > 0">
+          <td>Shipping</td>
+          <td>{{ cart.shippingCost | currency }}</td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><strong>Total</strong></td>
+          <td><strong>{{ (cartTotal(cart) - (cart.discountAmount || 0) + (cart.shippingCost || 0)) | currency }}</strong></td>
+          <td></td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <!-- Order Archive -->
+  <div class="section-divider"></div>
+  <h2>Order Archive</h2>
+  <p class="section-hint">All fulfilled orders, preserved across database resets.</p>
+
+  <div *ngIf="loadingArchived">Loading…</div>
+  <div *ngIf="archivedError" class="error-message">{{ archivedError }}</div>
+  <div *ngIf="!loadingArchived && !archivedError && archivedOrders.length === 0">No archived orders yet.</div>
+
+  <div *ngFor="let order of archivedOrders; trackBy: trackByArchivedOrderId" class="order-card archived-card">
+    <div class="order-header">
+      <div class="order-buyer">
+        <strong>{{ order.userName }}</strong>
+        <span class="buyer-email">{{ order.userEmail }}</span>
+      </div>
+      <div class="order-meta">
+        <span class="order-status status-fulfilled">Fulfilled</span>
+        <span *ngIf="order.invoiceNumber" class="order-invoice">Order #{{ order.invoiceNumber }}</span>
+        <span class="order-date">Ordered: {{ order.createdAt | date:'short' }}</span>
+        <span *ngIf="order.fulfilledAt" class="order-date">Fulfilled: {{ order.fulfilledAt | date:'short' }}</span>
+      </div>
+    </div>
+
+    <!-- Archived orders are always at stage 3 (Fulfilled). -->
+    <ol class="stepper stepper--compact" aria-label="Order status">
+      <li class="stepper__step is-done">
+        <span class="stepper__dot" aria-hidden="true">✓</span>
+        <span class="stepper__label">Open</span>
+      </li>
+      <li class="stepper__step is-done">
+        <span class="stepper__dot" aria-hidden="true">✓</span>
+        <span class="stepper__label">Submitted</span>
+      </li>
+      <li class="stepper__step is-current" aria-current="step">
+        <span class="stepper__dot" aria-hidden="true">3</span>
+        <span class="stepper__label">Fulfilled</span>
+      </li>
+    </ol>
+
+    <table>
+      <thead>
+        <tr><th>Comic</th><th>Price</th><th>Claimed</th></tr>
+      </thead>
+      <tbody>
+        <ng-container *ngFor="let row of groupedArchivedRows(order); trackBy: trackByRow">
+          <!-- Single comic: one row -->
+          <tr *ngIf="row.type === 'single'">
+            <td>{{ row.items[0].comicTitle }}{{ row.items[0].comicNumber ? ' ' + row.items[0].comicNumber : '' }}</td>
+            <td>
+              <ng-container *ngIf="showArchivedItemDiscounts(order); else plainArchivedPrice">
+                <span class="price-original">{{ row.items[0].price | currency }}</span>
+                <span *ngIf="discountedArchivedItemPrice(row.items[0], order) === 0" class="price-free-badge">FREE</span>
+                <span *ngIf="discountedArchivedItemPrice(row.items[0], order) !== 0" class="price-discounted">{{ discountedArchivedItemPrice(row.items[0], order) | currency }}</span>
+              </ng-container>
+              <ng-template #plainArchivedPrice>{{ row.items[0].price | currency }}</ng-template>
+            </td>
+            <td>{{ row.claimedAt | date:'short' }}</td>
+          </tr>
+          <!-- Set: header row then one row per member comic -->
+          <ng-container *ngIf="row.type === 'set'">
+            <tr class="set-header-row">
+              <td>
+                <span class="set-header-link">{{ row.containerTitle ?? row.items[0].comicTitle }}</span>
+                <span class="set-tag">Set {{ row.collectionGroup }}</span>
+              </td>
+              <td class="set-total-price">
+                <ng-container *ngIf="showArchivedItemDiscounts(order)">
+                  <span class="price-original">{{ row.totalPrice | currency }}</span>
+                  <span class="price-discounted">{{ discountedArchivedSetTotal(row, order) | currency }}</span>
+                </ng-container>
+                <span *ngIf="!showArchivedItemDiscounts(order)">{{ row.totalPrice | currency }}</span>
+              </td>
+              <td>{{ row.claimedAt | date:'short' }}</td>
+            </tr>
+            <tr *ngFor="let comic of row.items; trackBy: trackByComicId" class="set-member-row">
+              <td class="set-member-comic">{{ comic.comicTitle }}{{ comic.comicNumber ? ' ' + comic.comicNumber : '' }}</td>
+              <td class="set-member-price">
+                <ng-container *ngIf="showArchivedItemDiscounts(order)">
+                  <span class="price-original">{{ comic.price | currency }}</span>
+                  <span *ngIf="discountedArchivedItemPrice(comic, order) === 0" class="price-free-badge">FREE</span>
+                  <span *ngIf="discountedArchivedItemPrice(comic, order) !== 0" class="price-discounted">{{ discountedArchivedItemPrice(comic, order) | currency }}</span>
+                </ng-container>
+                <span *ngIf="!showArchivedItemDiscounts(order)">{{ comic.price | currency }}</span>
+              </td>
+              <td></td>
+            </tr>
+          </ng-container>
+        </ng-container>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td>Subtotal <span class="item-count-label">({{ archivedBookCount(order) }} book{{ archivedBookCount(order) !== 1 ? 's' : '' }})</span></td>
+          <td>{{ archivedOrderSubtotal(order) | currency }}</td>
+          <td></td>
+        </tr>
+        <tr *ngIf="order.discountAmount && order.discountAmount > 0">
+          <td>Discount</td>
+          <td class="discount-savings">-{{ order.discountAmount | currency }}
+            <span *ngIf="order.discountDescription" class="discount-desc">({{ order.discountDescription }})</span>
+          </td>
+          <td></td>
+        </tr>
+        <tr *ngIf="order.shippingCost && order.shippingCost > 0">
+          <td>Shipping</td>
+          <td>{{ order.shippingCost | currency }}</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><strong>Total</strong></td>
+          <td><strong>{{ archivedOrderTotal(order) | currency }}</strong></td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <div *ngIf="order.customerNotes" class="order-notes customer-notes">
+      <span class="notes-heading">Customer notes:</span> {{ order.customerNotes }}
+    </div>
+
+    <div *ngIf="order.shippingAddress" class="order-notes shipping-address-note">
+      <span class="notes-heading">Ship to:</span>
+      <span class="saved-note-text">
+        {{ order.userName }},
+        {{ order.shippingAddress.street1 }}{{ order.shippingAddress.street2 ? ', ' + order.shippingAddress.street2 : '' }},
+        {{ order.shippingAddress.city }}, {{ order.shippingAddress.state }} {{ order.shippingAddress.zip }}
+        <ng-container *ngIf="order.shippingAddress.phone"> · {{ order.shippingAddress.phone }}</ng-container>
+      </span>
+    </div>
+
+    <div class="order-notes admin-notes-row">
+      <span class="notes-heading">Seller notes:</span>
+      <ng-container *ngIf="!isNotesEditing(order.id, order.adminNotes)">
+        <span class="saved-note-text">{{ order.adminNotes }}</span>
+        <button type="button" class="btn-edit-note" (click)="notesEditing[order.id] = true">Edit</button>
+      </ng-container>
+      <ng-container *ngIf="isNotesEditing(order.id, order.adminNotes)">
+        <textarea class="admin-notes-textarea"
+                  rows="2"
+                  placeholder="Notes visible to customer…"
+                  [value]="initNoteDraft(order.id, order.adminNotes)"
+                  (input)="adminNoteDrafts[order.id] = $any($event.target).value"></textarea>
+        <button type="button" class="btn-save-notes" (click)="saveArchivedAdminNotes(order.id)">Save</button>
+      </ng-container>
+    </div>
+
+    <div *ngIf="order.shipped" class="order-notes tracking-note-row">
+      <span class="notes-heading">Tracking #:</span>
+      <ng-container *ngIf="!isTrackingEditing(order.id, order.trackingNumber)">
+        <span class="saved-note-text">{{ order.trackingNumber }}</span>
+        <button type="button" class="btn-edit-note" (click)="trackingEditing[order.id] = true">Edit</button>
+      </ng-container>
+      <ng-container *ngIf="isTrackingEditing(order.id, order.trackingNumber)">
+        <input type="text" class="tracking-input"
+               placeholder="Tracking number (optional)"
+               [value]="initArchivedTrackingDraft(order.id, order.trackingNumber)"
+               (input)="archivedTrackingDrafts[order.id] = $any($event.target).value">
+        <button type="button" class="btn-save-notes" (click)="saveArchivedTracking(order)">Save</button>
+      </ng-container>
+    </div>
+
+    <div class="order-actions">
+      <div class="fulfillment-checks">
+        <label class="fulfillment-check-label" [class.check-active]="order.paymentStatus === 'PAID'">
+          <input type="checkbox" [checked]="order.paymentStatus === 'PAID'" (change)="toggleArchivedPaid(order)">
+          Paid
+        </label>
+        <label class="fulfillment-check-label" [class.check-active]="order.shipped">
+          <input type="checkbox" [checked]="order.shipped" (change)="toggleArchivedShipped(order)">
+          Shipped
+        </label>
+      </div>
+      <button
+        class="btn-delete"
+        [class.btn-delete-confirm]="pendingDeleteId === order.id"
+        (click)="deleteArchivedOrder(order)">
+        {{ pendingDeleteId === order.id ? 'Confirm Delete?' : 'Delete' }}
+      </button>
+      <button *ngIf="hasSetItems(order)"
+        class="btn-full-delete"
+        [class.btn-full-delete-confirm]="pendingFullDeleteId === order.id"
+        (click)="fullDeleteArchivedOrder(order)"
+        title="Delete this archived order AND permanently remove all associated set comics from the database">
+        {{ pendingFullDeleteId === order.id ? 'Confirm Full Delete?' : 'Full Delete' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Release Set confirmation modal -->
+  <div class="modal-backdrop modal-overlay" *ngIf="adminConfirmModal" (click)="cancelAdminRelease()">
+    <div class="modal-box modal" role="dialog" aria-modal="true"
+         aria-labelledby="admin-release-modal-title"
+         (click)="$event.stopPropagation()">
+      <h3 id="admin-release-modal-title" class="modal-title modal__title">Release Set?</h3>
+      <p class="modal-body modal__body">
+        <strong>{{ adminConfirmModal.setTitle }}</strong> contains
+        <strong>{{ adminConfirmModal.bookCount }} book{{ adminConfirmModal.bookCount !== 1 ? 's' : '' }}</strong>.
+        All {{ adminConfirmModal.bookCount }} books will be returned to available.
+      </p>
+      <div class="modal-actions modal__actions">
+        <button class="modal-btn-cancel" (click)="cancelAdminRelease()">Cancel</button>
+        <button class="modal-btn-confirm" (click)="confirmAdminRelease()">Release Set</button>
+      </div>
+    </div>
+  </div>
+
+</div>

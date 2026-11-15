@@ -1,0 +1,6 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Maven Wrapper: mvnw.cmd must keep CRLF or cmd.exe mis-parses it
+mvnw.cmd text eol=crlf
+mvnw text eol=lf

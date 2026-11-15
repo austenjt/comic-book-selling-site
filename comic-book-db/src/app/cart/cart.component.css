@@ -1,0 +1,498 @@
+.cart-container { max-width: 800px; margin: 0 auto; padding: 24px 16px; }
+
+.item-count-label {
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
+/* Cart "Set" identity tag — solid warm-accent pill, see .pill in styles.css. */
+.set-tag {
+  display: inline-flex;
+  align-items: center;
+  margin-left: var(--space-2);
+  padding: 1px var(--space-2);
+  background: var(--color-warm-accent-deep);
+  color: var(--color-text-inverse);
+  font-size: 0.65rem;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  border-radius: 3px;
+  vertical-align: middle;
+  line-height: 1.4;
+}
+
+/* Cart status banner — three-state visual model (open / active / fulfilled).
+   Code still emits four states (OPEN/FINALIZING/FINALIZED/FULFILLED); the
+   visual collapse FINALIZING+FINALIZED → "active" happens in Phase 2.3 (the
+   stepper) via template logic. Until then both .status-finalizing and
+   .status-finalized read as warm "in-progress" / cool "submitted" respectively. */
+.cart-status {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-5);
+  font-weight: var(--fw-medium);
+}
+.status-open       { background: var(--color-success-bg); color: var(--color-success); }
+.status-finalizing { background: var(--color-warning-bg); color: var(--color-warning); }
+.status-finalized  { background: var(--color-info-bg);    color: var(--color-info); }
+.status-fulfilled  { background: rgba(79, 110, 47, 0.14); color: var(--color-primary); }
+
+table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+th, td { padding: 10px 12px; border: 1px solid var(--hairline); text-align: left; }
+th { background: #6c584c; color: #f0ead2; font-weight: bold; border-bottom: 2px solid var(--hairline-th); }
+td { color: var(--color-text); }
+
+tfoot td { font-weight: bold; background: #adc178; }
+
+/* Grand total pops in deep olive, slightly larger. */
+.grand-total-row td { color: var(--olive-deep); }
+.grand-total-row td:nth-child(2) strong { font-size: 1.2rem; }
+
+/* Release: outline-danger, small */
+.btn-release {
+  padding: var(--space-1) var(--space-3);
+  cursor: pointer;
+  color: var(--color-danger);
+  border: 1px solid var(--color-danger);
+  background: transparent;
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  transition: background-color var(--duration-base) var(--ease-standard);
+}
+.btn-release:hover { background: var(--color-danger-bg); }
+
+.cart-actions { margin-top: 16px; }
+.submit-note, .finalized-note { color: var(--color-text-muted); margin-bottom: 12px; line-height: 1.6; }
+
+.finalizing-note {
+  background: rgba(169,132,103,0.08);
+  border-left: 4px solid #a98467;
+  border-radius: 4px;
+  padding: 12px 16px;
+}
+.finalizing-note p {
+  margin: 0;
+  color: #a98467;
+  line-height: 1.6;
+}
+
+.submitted-panel {
+  background: rgba(169,132,103,0.08);
+  border-left: 4px solid #a98467;
+  border-radius: 4px;
+  padding: 14px 16px;
+}
+
+.submitted-heading {
+  margin: 0 0 12px;
+  color: #6b4f3a;
+  line-height: 1.6;
+  font-weight: 500;
+}
+
+.trade-ship-to {
+  background: #fff8f0;
+  border: 1px solid #e0c9a6;
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+}
+
+.store-address {
+  margin: 4px 0 0;
+  font-style: normal;
+  line-height: 1.6;
+  color: #3a3a3a;
+  font-size: 0.9375rem;
+}
+
+.notes-group {
+  margin-bottom: 12px;
+}
+
+.notes-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  margin-bottom: 6px;
+}
+
+.notes-optional {
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
+.notes-textarea {
+  width: 100%;
+  padding: 8px 10px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  color: var(--color-text);
+  font-size: 0.9rem;
+  font-family: inherit;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.customer-notes-display {
+  background: rgba(59,130,246,0.06);
+  border-left: 3px solid #3b82f6;
+  padding: 10px 14px;
+  border-radius: 4px;
+}
+
+.seller-notes-display {
+  background: rgba(173,193,120,0.08);
+  border-left: 3px solid #adc178;
+  padding: 10px 14px;
+  border-radius: 4px;
+}
+
+.notes-value {
+  margin: 4px 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  white-space: pre-wrap;
+}
+
+.payment-success-banner {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+  border-left: 4px solid var(--color-success);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3) var(--space-4);
+  font-weight: var(--fw-medium);
+}
+
+/* Square Pay Now button — matches Square's brand blue */
+.btn-square-pay {
+  display: inline-block;
+  padding: var(--space-2) var(--space-6);
+  background-color: #006aff;
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  font-family: inherit;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1) inset;
+  transition: background-color var(--duration-base) var(--ease-standard);
+  margin-right: var(--space-3);
+}
+.btn-square-pay:hover:not(:disabled) { background-color: #0058d6; }
+.btn-square-pay:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn-venmo-pay {
+  display: inline-block;
+  padding: var(--space-2) var(--space-6);
+  background-color: #3d95ce;
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  font-family: inherit;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color var(--duration-base) var(--ease-standard);
+  margin-right: var(--space-3);
+}
+.btn-venmo-pay:hover:not(:disabled) { background-color: #2e7ab5; }
+.btn-venmo-pay:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Checkout button row: Shipping / Pay by Card / Pay by Venmo */
+.checkout-button-row {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: var(--space-2);
+}
+
+/* Shipping: green when active, muted when done */
+.btn-shipping {
+  padding: var(--space-3) var(--space-6);
+  background: #2e7d32;
+  color: #fff;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-shipping:hover:not(:disabled) { background: #1b5e20; }
+.btn-shipping:disabled,
+.btn-shipping--done:disabled {
+  background: #9e9e9e;
+  color: #fff;
+  cursor: default;
+  opacity: 0.8;
+}
+
+/* Pay Later: secondary outline button */
+.btn-pay-later {
+  padding: var(--space-3) var(--space-6);
+  background: transparent;
+  color: var(--color-text);
+  border: 1px solid #bbb;
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-pay-later:hover:not(:disabled) { background: #f0f0f0; }
+.btn-pay-later:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.pay-later-note {
+  font-size: var(--fs-13);
+  color: #555;
+  margin: 0 0 var(--space-2);
+}
+
+/* Shipping address display in cart */
+.shipping-address-display .notes-value {
+  line-height: 1.6;
+}
+
+/* Unsubmit: outline-info (blue) — visually says "this is reversible" */
+.btn-unsubmit {
+  margin-top: var(--space-3);
+  padding: var(--space-2) var(--space-6);
+  background: transparent;
+  color: var(--color-info);
+  border: 1px solid var(--color-info);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-14);
+  cursor: pointer;
+  font-weight: var(--fw-semibold);
+  transition: background-color var(--duration-base) var(--ease-standard);
+}
+.btn-unsubmit:hover { background: var(--color-info-bg); }
+
+/* Submit: primary action — Deep Olive fill, AA */
+.btn-submit {
+  padding: var(--space-3) var(--space-6);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-16);
+  cursor: pointer;
+  font-weight: var(--fw-semibold);
+  transition:
+    background-color var(--duration-base) var(--ease-standard),
+    border-color     var(--duration-base) var(--ease-standard);
+}
+.btn-submit:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+}
+.btn-submit:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.shipping-free { color: #7b8f4b; font-weight: 500; }
+.shipping-cost { color: var(--color-text); font-weight: 500; }
+.shipping-note { display: block; font-size: 0.78rem; font-weight: 400; color: var(--color-text-muted); margin-top: 2px; }
+
+.discount-savings { color: #7b8f4b; font-weight: 500; }
+.discount-desc { font-size: 0.85em; color: var(--color-text-muted); margin-left: 0.4rem; }
+
+.price-original { text-decoration: line-through; color: var(--color-text-muted); margin-right: 6px; }
+.price-discounted { color: var(--color-primary); font-weight: var(--fw-semibold); }
+/* "FREE" identity badge — solid primary, see .pill in styles.css. */
+.price-free-badge {
+  display: inline-flex;
+  align-items: center;
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  font-size: 0.72rem;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 1px var(--space-2);
+  border-radius: 3px;
+  vertical-align: middle;
+  line-height: 1.4;
+}
+
+/* Set header row: title, Set tag, claimed date, Release button */
+.set-header-row td {
+  background: rgba(169, 132, 103, 0.07);
+  font-weight: 600;
+}
+
+.set-total-price {
+  font-weight: 400;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+.set-header-link {
+  color: var(--color-text);
+  text-decoration: none;
+}
+.set-header-link:hover { text-decoration: underline; }
+
+/* Set member rows: one per comic in the set */
+.set-member-row td {
+  background: rgba(169, 132, 103, 0.03);
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.set-member-comic {
+  padding-left: 24px;
+}
+
+.set-member-comic a {
+  color: #7b8f4b;
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+.set-member-comic a:hover { text-decoration: underline; }
+
+.set-member-price {
+  font-size: 0.875rem;
+}
+
+/* Graded-comic rows: blue left border + faint cool tint. */
+.graded-row td { background: rgba(50, 110, 200, 0.06); }
+.graded-row td:first-child { border-left: 3px solid #3a7ec9; }
+
+.empty-cart { color: var(--color-text-muted); }
+.empty-cart a { color: var(--color-primary); }
+.error-message { color: var(--color-danger); margin-bottom: var(--space-3); }
+
+/* ── Release confirmation modal ──────────────────────────────────── */
+/* Chrome (overlay/dialog/title/body/actions) is provided by the shared
+   .modal-overlay / .modal / .modal__* classes in global styles.css. Only
+   dialog-specific tweaks live here. */
+.modal-body strong { color: var(--color-text); }
+
+.modal-btn-cancel {
+  padding: var(--space-2) var(--space-4);
+  background: transparent;
+  color: var(--color-text);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  transition: background-color var(--duration-base) var(--ease-standard);
+}
+.modal-btn-cancel:hover { background: var(--color-surface-alt); }
+
+.modal-btn-confirm {
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-danger);
+  color: var(--color-text-inverse);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  transition: background-color var(--duration-base) var(--ease-standard);
+}
+.modal-btn-confirm:hover {
+  background: var(--color-danger-hover);
+  border-color: var(--color-danger-hover);
+}
+
+/* ── Responsive (Phase 3.D) ──────────────────────────────────────────
+   The cart table has 4 columns (Comic / Price / Claimed / Release). On
+   tablets and below, tighten cell padding + font sizes so the table fits
+   without horizontal scroll. The set-member-comic indent also collapses. */
+@media screen and (max-width: 640px) {
+  .cart-container { padding: var(--space-4) var(--space-3); }
+  th, td { padding: var(--space-2) var(--space-2); font-size: 0.875rem; }
+  .set-member-comic { padding-left: var(--space-3); }
+  .btn-release { padding: 2px var(--space-2); font-size: var(--fs-12); }
+  .btn-submit { width: 100%; padding: var(--space-3) var(--space-4); }
+  .btn-unsubmit { width: 100%; }
+}
+
+@media screen and (max-width: 420px) {
+  th, td { padding: 6px 6px; }
+  th { font-size: 0.78rem; }
+  /* Hide the "Claimed At" timestamp column header label and value at the
+     smallest widths — date is also visible in order-history detail view. */
+  th:nth-child(3), td:nth-child(3) { display: none; }
+}
+
+/* ── Trade credit items ──────────────────────────────────────────────── */
+.trade-credit-row {
+  background: #f0fff0;
+}
+
+.trade-offered-grade {
+  margin-left: 0.4rem;
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}
+
+.trade-badge {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.5rem;
+  padding: 1px 6px;
+  background: #2a7a2a;
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 3px;
+  vertical-align: middle;
+  line-height: 1.4;
+}
+
+.trade-credit-price {
+  color: #2a7a2a;
+  font-weight: 700;
+}
+
+.trade-submit-note {
+  color: #5a3d00;
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  border-radius: 5px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.87rem;
+}
+
+.balance-warning {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 6px;
+  color: #856404;
+  font-size: 0.9rem;
+  padding: 0.75rem 1rem;
+}
+
+.trade-shipping-note {
+  background: #e8f5e9;
+  border: 1px solid #a5d6a7;
+  border-radius: 6px;
+  color: #1b5e20;
+  font-size: 0.9rem;
+  padding: 0.75rem 1rem;
+}
+
+.trade-received-badge {
+  display: inline-block;
+  margin-left: 0.75rem;
+  background: #2a7a2a;
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}

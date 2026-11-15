@@ -1,0 +1,23 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "AzureWebJobs.expireAbandonedCarts.Disabled": "true",
+    "AzureWebJobs.pruneReturnEvents.Disabled": "true",
+    "AzureWebJobs.sweepSubmittedOrders.Disabled": "true",
+    "FUNCTIONS_WORKER_RUNTIME": "java",
+    "COSMOS_ENDPOINT": "https://<your-cosmos-account>.documents.azure.com:443/",
+    "ADMIN_EMAIL": "john.doe@example.com",
+    "EMAIL_ENABLED": "false",
+    "AWARD_MODE_ENABLED": "true",
+    "DASHBOARD_PAGE_SIZE": "500",
+    "SMTP_HOST": "smtp.example.com",
+    "SMTP_USERNAME": "john.doe@example.com",
+    "SMTP_PASSWORD": "<your-smtp-password>",
+    "MSAL_CLIENT_ID": "<your-entra-app-client-id>",
+    "MSAL_TENANT_ID": "<your-entra-tenant-id>",
+    "MSAL_TENANT_SUBDOMAIN": "<your-tenant-subdomain>",
+    "SQUARE_ACCESS_TOKEN": "<your-square-access-token>",
+    "SQUARE_LOCATION_ID": "<your-square-location-id>"
+  }
+}

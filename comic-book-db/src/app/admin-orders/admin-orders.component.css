@@ -1,0 +1,538 @@
+.orders-container { padding: 24px; max-width: 900px; margin: 0 auto; }
+
+.trade-credit-row {
+  background: #f0fff0;
+}
+
+.trade-offered-grade {
+  margin-left: 0.4rem;
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}
+
+.trade-badge {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.5rem;
+  padding: 1px 6px;
+  background: #2a7a2a;
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 3px;
+  vertical-align: middle;
+  line-height: 1.4;
+}
+
+.trade-credit-price {
+  color: #2a7a2a;
+  font-weight: 700;
+}
+
+.price-original {
+  text-decoration: line-through;
+  color: #aaa;
+  margin-right: 4px;
+}
+
+.price-discounted {
+  color: #4caf50;
+  font-weight: 600;
+}
+
+.discount-savings { color: #4caf50; font-weight: 500; }
+.discount-desc { font-size: 0.85em; color: var(--color-text-muted); margin-left: 0.4rem; }
+
+/* "FREE" identity badge — solid primary, see .pill in styles.css. */
+.price-free-badge {
+  display: inline-flex;
+  align-items: center;
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  font-size: 0.72rem;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 1px var(--space-2);
+  border-radius: 3px;
+  vertical-align: middle;
+  line-height: 1.4;
+}
+
+.item-count-label {
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
+/* Order line "Set" identity tag — solid warm-accent. */
+.set-tag {
+  display: inline-flex;
+  align-items: center;
+  margin-left: var(--space-2);
+  padding: 1px var(--space-2);
+  background: var(--color-warm-accent-deep);
+  color: var(--color-text-inverse);
+  font-size: 0.65rem;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  border-radius: 3px;
+  vertical-align: middle;
+  line-height: 1.4;
+}
+
+/* .order-card, .order-header, .order-meta, .order-date are shared
+   utilities in styles.css (Order-card patterns block). */
+
+/* Admin-only buyer block inside .order-header. */
+.order-buyer { display: flex; flex-direction: column; }
+.order-buyer strong { color: #ffffff; }
+.buyer-email { color: rgba(240,234,210,0.7); font-size: 0.88rem; }
+
+/* Order status badge — sits on the dark Bark .order-header background, so
+   it uses lighter, higher-luminance tints than the parchment-context .pill.
+   AA-large @ semibold/bold on Bark (#6C584C) verified for each color. */
+.order-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px var(--space-3);
+  border-radius: 12px;
+  font-size: var(--fs-12);
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+.status-open       { background: rgba(173, 193, 120, 0.25); color: var(--sage-light); }
+.status-finalizing { background: rgba(169, 132, 103, 0.25); color: #E5C9B0; }
+.status-finalized  { background: rgba(147, 197, 253, 0.20); color: #93C5FD; }
+
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 10px 16px; border-bottom: 1px solid var(--color-border); text-align: left; color: var(--color-text); }
+th { font-weight: bold; background: #adc178; }
+tfoot td { font-weight: bold; background: #adc178; }
+
+.order-actions { padding: 12px 16px; background: #6c584c; border-top: 1px solid var(--color-border); }
+
+.order-notes {
+  padding: 10px 16px;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.88rem;
+  color: var(--color-text);
+}
+
+.customer-notes {
+  background: rgba(59,130,246,0.06);
+  color: var(--color-text-muted);
+}
+
+.notes-heading {
+  font-weight: 600;
+  margin-right: 6px;
+  color: var(--color-text-muted);
+}
+
+.admin-notes-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  flex-wrap: wrap;
+  background: rgba(169,132,103,0.05);
+}
+
+.admin-notes-textarea {
+  flex: 1;
+  min-width: 200px;
+  padding: 6px 8px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  color: var(--color-text);
+  font-size: 0.85rem;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.btn-save-notes {
+  padding: var(--space-1) var(--space-3);
+  background: transparent;
+  color: var(--color-warm-accent);
+  border: 1px solid var(--color-warm-accent);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-14);
+  cursor: pointer;
+  font-weight: var(--fw-semibold);
+  white-space: nowrap;
+  transition: background-color var(--duration-base) var(--ease-standard);
+}
+.btn-save-notes:hover { background: rgba(169, 132, 103, 0.12); }
+
+.saved-note-text {
+  flex: 1;
+  white-space: pre-wrap;
+  color: var(--color-text);
+  font-size: 0.88rem;
+}
+
+.btn-edit-note {
+  padding: var(--space-1) var(--space-3);
+  background: transparent;
+  color: var(--color-text);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color var(--duration-base) var(--ease-standard);
+}
+.btn-edit-note:hover { background: var(--color-surface-alt); }
+
+.tracking-note-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  background: rgba(173,193,120,0.05);
+}
+
+.fulfillment-checks {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-right: auto;
+  flex-wrap: wrap;
+}
+
+.fulfillment-check-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.85rem;
+  color: rgba(240,234,210,0.7);
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+}
+.fulfillment-check-label.check-active { color: #adc178; }
+.fulfillment-check-label input[type="checkbox"] { cursor: pointer; accent-color: #adc178; }
+
+.tracking-input {
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--color-border);
+  background: #6c584c;
+  color: #f0ead2;
+  font-size: 0.82rem;
+  width: 200px;
+}
+
+/* The .order-actions footer sits on a Bark (#6c584c) background, so outline
+   buttons need lighter foreground colors to maintain readability:
+   - Sage / pale-blue / parchment for outline variants (3.7+ AA-large @ semibold)
+   - Filled-danger for destructive actions (parchment text on a red fill,
+     replaces the previous red-outline-on-dark which failed AA badly). */
+
+.btn-unsubmit {
+  padding: var(--space-2) var(--space-6);
+  background: transparent;
+  color: #93C5FD;                       /* light blue — readable on Bark @ semibold */
+  border: 1px solid #93C5FD;
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-14);
+  cursor: pointer;
+  font-weight: var(--fw-semibold);
+  transition: background-color var(--duration-base) var(--ease-standard);
+}
+.btn-unsubmit:hover { background: rgba(147, 197, 253, 0.14); }
+
+.trade-order-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  background: #1b5e20;
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  border-radius: 4px;
+  vertical-align: middle;
+  line-height: 1.5;
+}
+
+.trade-order-badge--received {
+  background: #2e7d32;
+  opacity: 0.75;
+}
+
+.venmo-pending-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  background: #3d95ce;
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  border-radius: 4px;
+  vertical-align: middle;
+  line-height: 1.5;
+}
+
+.btn-mark-trade-received {
+  padding: var(--space-2) var(--space-6);
+  background: #2e7d32;
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-14);
+  cursor: pointer;
+  font-weight: var(--fw-semibold);
+  transition: background-color var(--duration-base) var(--ease-standard);
+}
+
+.btn-mark-trade-received:hover:not(:disabled) { background: #1b5e20; }
+.btn-mark-trade-received:disabled { opacity: 0.55; cursor: default; }
+
+/* Refresh-discounts: same outline style as Unsubmit, in a distinct hue (warm amber) so the
+   admin can pick it out. Used to recompute discount math on a submitted order. */
+.btn-refresh-discounts {
+  padding: var(--space-2) var(--space-6);
+  background: transparent;
+  color: #FCD34D;
+  border: 1px solid #FCD34D;
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-14);
+  cursor: pointer;
+  font-weight: var(--fw-semibold);
+  transition: background-color var(--duration-base) var(--ease-standard);
+}
+.btn-refresh-discounts:hover:not(:disabled) { background: rgba(252, 211, 77, 0.14); }
+.btn-refresh-discounts:disabled { opacity: 0.55; cursor: default; }
+
+.btn-fulfill {
+  padding: var(--space-2) var(--space-6);
+  background: transparent;
+  color: var(--sage);                   /* Sage on Bark = 3.72 AA-large @ semibold */
+  border: 1px solid var(--sage);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-14);
+  cursor: pointer;
+  font-weight: var(--fw-semibold);
+  transition: background-color var(--duration-base) var(--ease-standard);
+}
+.btn-fulfill:hover:not(:disabled) { background: rgba(173, 193, 120, 0.14); }
+.btn-fulfill:disabled {
+  background: transparent;
+  color: #c8d4a8;
+  border-color: #c8d4a8;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.btn-fulfill-confirm {
+  border-color: var(--color-warm-accent);
+  color: #E5C9B0;                       /* warm light tan — readable on Bark */
+}
+.btn-fulfill-confirm:hover:not(:disabled) { background: rgba(169, 132, 103, 0.18); }
+
+/* Release in admin orders: filled-danger (was outline-red on dark, ratio 1.53). */
+.btn-release {
+  padding: var(--space-1) var(--space-3);
+  background: var(--color-danger);
+  color: var(--color-text-inverse);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+  transition: background-color var(--duration-base) var(--ease-standard);
+}
+.btn-release:hover {
+  background: var(--color-danger-hover);
+  border-color: var(--color-danger-hover);
+}
+
+/* Graded-comic rows: blue left border + faint cool tint. */
+.graded-row td { background: rgba(50, 110, 200, 0.06); }
+.graded-row td:first-child { border-left: 3px solid #3a7ec9; }
+
+.success-message { color: var(--color-success); margin-bottom: var(--space-4); }
+.error-message { color: var(--color-danger); margin-bottom: var(--space-3); }
+
+.section-divider {
+  border: none;
+  border-top: 2px solid var(--color-border);
+  margin: 36px 0 28px;
+}
+
+.open-cart-card {
+  opacity: 0.9;
+}
+
+.archived-card {
+  border-color: #b8c89a;
+}
+
+/* Fulfilled badge — same dark-bg context as other .order-status variants. */
+.status-fulfilled {
+  background: rgba(173, 193, 120, 0.25);
+  color: var(--sage-light);
+}
+
+/* Stepper sits between the dark .order-header and the items table. Give it
+   breathing room and a parchment background so the dot circles read clean. */
+.order-card .stepper {
+  padding: var(--space-4) var(--space-4) var(--space-2);
+  background: var(--color-bg);
+  margin: 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.order-actions { display: flex; gap: 10px; }
+
+/* Full-delete + delete: filled-danger (sit on the dark Bark order-actions footer) */
+.btn-full-delete,
+.btn-delete {
+  padding: var(--space-2) var(--space-6);
+  background: var(--color-danger);
+  color: var(--color-text-inverse);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-14);
+  cursor: pointer;
+  font-weight: var(--fw-semibold);
+  transition: background-color var(--duration-base) var(--ease-standard);
+}
+.btn-full-delete:hover,
+.btn-delete:hover {
+  background: var(--color-danger-hover);
+  border-color: var(--color-danger-hover);
+}
+
+/* Confirm state — slightly darker, with a subtle inset ring to mark "armed" */
+.btn-full-delete-confirm,
+.btn-delete-confirm {
+  background: var(--color-danger-hover);
+  border-color: var(--color-danger-hover);
+  box-shadow: inset 0 0 0 2px rgba(240, 234, 210, 0.35);
+}
+.btn-full-delete-confirm:hover,
+.btn-delete-confirm:hover {
+  background: #6F3324;
+  border-color: #6F3324;
+}
+
+.section-hint {
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+  margin: -0.5rem 0 1rem;
+}
+
+/* ── Set rows ──────────────────────────────────────────────────────── */
+.set-header-row td {
+  background: rgba(169, 132, 103, 0.07);
+  font-weight: 600;
+}
+
+.set-total-price {
+  font-weight: 400;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+.set-header-link {
+  color: var(--color-text);
+  text-decoration: none;
+}
+.set-header-link:hover { text-decoration: underline; }
+
+.set-member-row td {
+  background: rgba(169, 132, 103, 0.03);
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.set-member-comic {
+  padding-left: 24px;
+  font-size: 0.875rem;
+}
+
+.set-member-comic a {
+  color: #7b8f4b;
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+.set-member-comic a:hover { text-decoration: underline; }
+
+.set-member-price {
+  font-size: 0.875rem;
+}
+
+/* ── Release confirmation modal ────────────────────────────────────── */
+/* Chrome (overlay/dialog/title/body/actions) is provided by the shared
+   .modal-overlay / .modal / .modal__* classes in global styles.css. Only
+   dialog-specific tweaks live here. */
+.modal-body strong { color: var(--color-text); }
+
+.modal-btn-cancel {
+  padding: var(--space-2) var(--space-4);
+  background: transparent;
+  color: var(--color-text);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  transition: background-color var(--duration-base) var(--ease-standard);
+}
+.modal-btn-cancel:hover { background: var(--color-surface-alt); }
+
+.modal-btn-confirm {
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-danger);
+  color: var(--color-text-inverse);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  transition: background-color var(--duration-base) var(--ease-standard);
+}
+.modal-btn-confirm:hover {
+  background: var(--color-danger-hover);
+  border-color: var(--color-danger-hover);
+}
+
+/* ── Responsive (Phase 3.D) ──────────────────────────────────────────
+   Admin Orders sits on a wider container (max 900px) with denser tables
+   and a Bark .order-actions footer that holds checks + 2-3 buttons. On
+   tablets/phones, tighten cells, allow the footer to wrap, and stretch
+   the tracking input and buttons to full width so they remain tappable. */
+@media screen and (max-width: 768px) {
+  .orders-container { padding: var(--space-4) var(--space-3); }
+  th, td { padding: var(--space-2) var(--space-3); font-size: 0.875rem; }
+  .order-actions { flex-wrap: wrap; }
+  .fulfillment-checks { flex-basis: 100%; margin-right: 0; }
+  .tracking-input { flex: 1; min-width: 0; width: auto; }
+}
+
+@media screen and (max-width: 480px) {
+  th, td { padding: 6px var(--space-2); font-size: 0.82rem; }
+  th { font-size: 0.78rem; }
+  .set-member-comic { padding-left: var(--space-3); }
+  /* Hide the "Claimed" date column at the smallest widths — still shown
+     in the order header (Opened / Finalized timestamps). */
+  th:nth-child(3), td:nth-child(3) { display: none; }
+  .btn-unsubmit, .btn-fulfill, .btn-full-delete, .btn-delete, .btn-refresh-discounts {
+    flex: 1;
+    padding: var(--space-2) var(--space-3);
+  }
+  .btn-release { padding: 2px var(--space-2); }
+  .admin-notes-textarea { min-width: 0; }
+}

@@ -1,0 +1,87 @@
+<div class="trade-board-container">
+  <h2>Trade Board</h2>
+  <p class="trade-intro">
+    Comics we're looking to add to our collection. Own one? Offer it as trade-in credit toward your order.
+    <a routerLink="/documentation" fragment="trade-in" class="trade-learn-more">Learn how it works</a>
+  </p>
+
+  <div *ngIf="loading" class="warming-up">
+    <div class="warming-up-spinner"></div>
+    <span>Please wait while things warm up. This site is not always on, and turns on when visited.</span>
+  </div>
+  <div *ngIf="error" class="error-message">{{ error }}</div>
+
+  <div *ngIf="!loading && wantedComics.length === 0 && !error" class="trade-empty">
+    No wanted comics at this time. Check back soon!
+  </div>
+
+  <div *ngIf="!auth.isLoggedIn()" class="trade-login-banner">
+    <a routerLink="/login">Log in</a> to offer a trade-in.
+  </div>
+
+  <div class="trade-controls" *ngIf="wantedComics.length > 0">
+    <button class="btn-expand-all"
+            [class.btn-expand-all-active]="expandAll"
+            (click)="expandAll = !expandAll; expandedComicId = null">
+      {{ expandAll ? 'Show Previews' : 'Show Details' }}
+    </button>
+  </div>
+
+  <div class="wanted-grid" *ngIf="wantedComics.length > 0">
+    <app-trade-card
+      *ngFor="let comic of wantedComics; trackBy: trackById"
+      [comic]="comic"
+      [isAdded]="isAdded(comic)"
+      [isOfferedByOther]="isOfferedByOther(comic)"
+      [isCopying]="copyingId === comic.id"
+      [isCopied]="copiedId === comic.id"
+      [canOffer]="canOffer()"
+      [isAdmin]="auth.isAdmin()"
+      [expanded]="expandAll || expandedComicId === comic.id"
+      (expandRequested)="expandedComicId = comic.id"
+      (offerRequested)="openModal(comic)"
+      (copyRequested)="copyComic(comic)">
+    </app-trade-card>
+  </div>
+</div>
+
+<!-- Grade selector modal -->
+<div class="modal-overlay" *ngIf="modalComic" (click)="closeModal()">
+  <div class="modal modal--sm trade-grade-modal" (click)="$event.stopPropagation()">
+    <h3 class="modal-title">Offer Trade</h3>
+    <p class="modal-comic-name">{{ comicLabel(modalComic) }}</p>
+
+    <div class="modal-field">
+      <label class="modal-label">What condition is your copy?</label>
+      <select class="modal-select" [(ngModel)]="selectedGrade" required>
+        <option [ngValue]="null" disabled>— Select grade —</option>
+        <option *ngFor="let g of gradeOptions" [ngValue]="g.value">{{ g.value }} — {{ g.label }}</option>
+      </select>
+      <div *ngIf="selectedGrade == null" class="modal-required-hint">Grade is required.</div>
+    </div>
+
+    <div class="modal-preview">
+      <span class="modal-preview-label">Your trade credit:</span>
+      <span class="modal-preview-value">{{ previewCredit | currency }}</span>
+    </div>
+
+    <div *ngIf="!modalComic.expectedValue" class="modal-no-value">
+      This comic does not have a trade value set yet. Contact us for a custom quote.
+    </div>
+
+    <div *ngIf="gradeWarning" class="modal-grade-warning">
+      ⚠ The grade you selected is not within 2 grades of what we're looking for. Try to find a closer graded copy to trade.
+    </div>
+
+    <div *ngIf="submitError" class="modal-error">{{ submitError }}</div>
+
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" (click)="closeModal()" [disabled]="submitting">Cancel</button>
+      <button class="btn-modal-confirm"
+              (click)="confirmTrade()"
+              [disabled]="submitting || !modalComic.expectedValue || selectedGrade == null">
+        {{ submitting ? 'Adding…' : 'Add to Cart' }}
+      </button>
+    </div>
+  </div>
+</div>

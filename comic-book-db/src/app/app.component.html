@@ -1,0 +1,58 @@
+<header class="app-header">
+  <div class="header-inner">
+
+    <div class="header-logo">
+      <a routerLink="/selling"><img src="assets/logo.svg" alt="Logo" class="logo-img"></a>
+    </div>
+
+    <div class="header-center">
+      <div class="header-title">
+        <div class="header-title-line1">Lightning Comics Rocks<span class="header-title-since">since May 1, 2026</span></div>
+      </div>
+      <nav>
+        <a routerLink="/selling" routerLinkActive="active">Selling</a>
+        <a routerLink="/trade" routerLinkActive="active">Trade</a>
+
+        <ng-container *ngIf="auth.isLoggedIn() && !auth.isAdmin()">
+          <a routerLink="/orders" routerLinkActive="active">Orders</a>
+        </ng-container>
+
+        <ng-container *ngIf="auth.isAdmin()">
+          <a routerLink="/admin/orders" routerLinkActive="active">Orders</a>
+          <a routerLink="/inventory" routerLinkActive="active">Inventory</a>
+          <a routerLink="/sales" routerLinkActive="active">Sales</a>
+          <a routerLink="/admin/users" routerLinkActive="active">Admin</a>
+        </ng-container>
+
+        <a *ngIf="!auth.isAdmin()" routerLink="/sales" routerLinkActive="active">Sales</a>
+        <a *ngIf="!auth.isAdmin()" routerLink="/documentation" routerLinkActive="active">Documentation</a>
+        <a *ngIf="!auth.isAdmin()" routerLink="/contact" routerLinkActive="active">Contact</a>
+      </nav>
+    </div>
+
+    <!-- User avatar — always visible; shows Login or Profile/Logout depending on auth state -->
+    <div class="header-user">
+      <button class="avatar-btn" (click)="profileOpen = !profileOpen" [class.open]="profileOpen" aria-label="User menu"
+              [title]="(auth.currentUser$ | async)?.name || 'Anonymous'">
+        <img src="assets/lightning_bolt_snap_morphing.svg" alt="Profile" class="avatar-icon">
+      </button>
+      <div class="profile-dropdown" *ngIf="profileOpen" (click)="profileOpen = false">
+        <ng-container *ngIf="auth.isLoggedIn(); else loggedOut">
+          <div class="dropdown-name">{{ auth.currentUser$.value?.name }}</div>
+          <a routerLink="/profile" class="dropdown-item">My Profile</a>
+          <button class="dropdown-item dropdown-logout" (click)="logout()">Logout</button>
+        </ng-container>
+        <ng-template #loggedOut>
+          <button class="dropdown-item" (click)="login()">Login</button>
+        </ng-template>
+      </div>
+    </div>
+
+  </div>
+</header>
+
+<main class="app-main">
+  <router-outlet></router-outlet>
+</main>
+
+<app-sales-modal></app-sales-modal>

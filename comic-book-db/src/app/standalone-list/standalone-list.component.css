@@ -1,0 +1,378 @@
+/* Resizable grid wrapper — user drags the bottom-right handle to make it taller */
+.grid-resize-wrapper {
+  resize: vertical;
+  overflow: hidden;
+  min-height: 400px;
+  height: 600px;
+  width: 100%;
+  /* Visual cue: subtle bottom border so the drag handle is obvious */
+  border-bottom: 3px solid var(--color-border, #cbd5e1);
+  border-radius: 0 0 4px 4px;
+  box-sizing: border-box;
+}
+
+.grid-toolbar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  align-items: center;
+}
+
+.grid-search {
+  margin-left: auto;
+  padding: 5px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 13px;
+  width: 220px;
+}
+
+.toolbar-btn {
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  transition: background-color var(--duration-base) var(--ease-standard);
+}
+
+.add-btn {
+  background-color: var(--color-primary);
+  color: var(--color-text-inverse);
+  border-color: var(--color-primary);
+}
+
+.add-btn:hover {
+  background-color: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+}
+
+.delete-btn {
+  background-color: var(--color-danger);
+  color: var(--color-text-inverse);
+  border-color: var(--color-danger);
+}
+
+.delete-btn:hover {
+  background-color: var(--color-danger-hover);
+  border-color: var(--color-danger-hover);
+}
+
+.refresh-btn {
+  background-color: var(--color-primary);
+  color: var(--color-text-inverse);
+  border-color: var(--color-primary);
+}
+
+.refresh-btn:hover:not(:disabled) {
+  background-color: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+}
+
+.refresh-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.grid-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 160px;
+  border: 2px dashed #b8c89a;
+  border-radius: 6px;
+  color: #79675c;
+  font-size: 0.95rem;
+  background: var(--color-surface);
+}
+
+
+.add-set-section {
+  padding: 12px 18px;
+}
+
+.add-set-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+/* ── Set Modals ─────────────────────────────────────────────────────────── */
+/* Chrome (overlay/dialog) is provided by the shared .modal-overlay / .modal
+   classes in global styles.css. .sl-modal-wide is preserved as a no-op
+   alias retained for templates that still reference it; new templates use
+   .modal--lg directly via the shared system. */
+.sl-modal-wide { /* kept for backwards-compatibility; size now handled by .modal--lg */ }
+
+.sl-modal-title {
+  font-size: var(--fs-18);
+  font-weight: var(--fw-bold);
+  color: var(--color-text);
+  margin: 0 0 var(--space-1);
+}
+
+.sl-modal-subtitle {
+  font-size: var(--fs-14);
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-3);
+}
+
+.sl-modal-hint {
+  font-size: 0.82rem;
+  color: #79675c;
+  margin: 4px 0 8px;
+}
+
+.sl-modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 14px;
+}
+
+.sl-modal-field label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #7b8f4b;
+}
+
+.sl-modal-field input {
+  padding: 6px 10px;
+  border: 1px solid #b8c89a;
+  border-radius: 4px;
+  background: #dde5b6;
+  color: #6c584c;
+  font-size: 0.88rem;
+}
+
+.sl-modal-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 16px;
+}
+
+
+.sl-saving-hint {
+  font-size: 0.82rem;
+  color: #79675c;
+  font-style: italic;
+}
+
+.sl-field-hint {
+  font-size: 0.75rem;
+  color: #7b8f4b;
+  font-style: italic;
+}
+
+.sl-modal-field input[readonly] {
+  background: #c8d4a8;
+  color: #79675c;
+  cursor: default;
+}
+
+.sl-item-row-plain {
+  cursor: default;
+}
+
+.sl-item-row-plain:hover {
+  background: inherit;
+}
+
+.sl-item-count {
+  font-size: 0.75rem;
+  color: #79675c;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.sl-search-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 7px 10px;
+  border: 1px solid #b8c89a;
+  border-radius: 4px;
+  background: #dde5b6;
+  color: #6c584c;
+  font-size: 0.88rem;
+  margin-bottom: 8px;
+}
+
+.sl-search-input:focus {
+  border-color: #7b8f4b;
+  outline: none;
+}
+
+.sl-item-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 4px;
+  max-height: 260px;
+  overflow-y: auto;
+  border: 1px solid #b8c89a;
+  border-radius: 4px;
+}
+
+.sl-item-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #b8c89a;
+  transition: background 0.12s;
+}
+
+.sl-item-row:last-child { border-bottom: none; }
+
+.sl-item-row:hover { background: #c8d4a8; }
+
+.sl-item-row-disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.sl-item-name {
+  font-size: 0.88rem;
+  color: #6c584c;
+}
+
+.sl-item-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #7b8f4b;
+  white-space: nowrap;
+}
+
+/* ── Quick Add ──────────────────────────────────────────────────────────── */
+
+.qa-section {
+  border: 1px solid #b8c89a;
+  border-radius: 6px;
+  background: #f0ead2;
+  padding: 14px 18px 10px;
+  margin-bottom: 14px;
+}
+
+.qa-header {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.qa-title {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #7b8f4b;
+}
+
+.qa-step-indicator {
+  font-size: 0.8rem;
+  color: #79675c;
+}
+
+.qa-fields {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px 16px;
+  margin-bottom: 10px;
+}
+
+.qa-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.qa-field label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #7b8f4b;
+}
+
+.qa-field input[type="text"],
+.qa-field input[type="number"],
+.qa-field input[type="date"],
+.qa-field select {
+  padding: 5px 8px;
+  border: 1px solid #b8c89a;
+  border-radius: 4px;
+  font-size: 0.88rem;
+  background: #dde5b6;
+  color: #6c584c;
+}
+
+.qa-field-checkbox {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  padding-top: 18px;
+}
+
+.qa-field-checkbox input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
+}
+
+.qa-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.qa-btn {
+  padding: var(--space-1) var(--space-4);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  color: var(--color-text-inverse);
+  margin: 0;
+  transition: background-color var(--duration-base) var(--ease-standard);
+}
+
+.qa-btn-next  { background: var(--color-primary); border-color: var(--color-primary); }
+.qa-btn-next:hover  { background: var(--color-primary-hover); border-color: var(--color-primary-hover); }
+
+.qa-btn-back  { background: transparent; color: var(--color-text); border-color: var(--color-border-strong); }
+.qa-btn-back:hover  { background: var(--color-surface-alt); }
+
+.qa-btn-graded { background: var(--color-warm-accent-deep); color: var(--color-text-inverse); border-color: var(--color-warm-accent-deep); }
+.qa-btn-graded:hover { background: #6F5240; border-color: #6F5240; }
+
+.qa-btn-save  { background: var(--color-primary); border-color: var(--color-primary); }
+.qa-btn-save:hover:not(:disabled)  { background: var(--color-primary-hover); border-color: var(--color-primary-hover); }
+.qa-btn-save:disabled { background: var(--color-surface); color: var(--color-text-muted); border-color: var(--color-border); cursor: not-allowed; }
+
+.qa-btn-reset { background: transparent; border: 1px solid var(--color-border-strong); color: var(--color-text); }
+.qa-btn-reset:hover { background: var(--color-surface-alt); }
+
+.qa-success {
+  color: var(--color-success);
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  margin-bottom: var(--space-2);
+}
+
+.qa-error {
+  color: var(--color-danger);
+  font-size: var(--fs-14);
+  margin-bottom: var(--space-2);
+}
+
+.qa-field.qa-field-error label {
+  color: var(--color-danger);
+}
+
+.qa-field.qa-field-error input[type="text"],
+.qa-field.qa-field-error input[type="number"],
+.qa-field.qa-field-error select {
+  border-color: var(--color-danger);
+  background: var(--color-danger-bg);
+}

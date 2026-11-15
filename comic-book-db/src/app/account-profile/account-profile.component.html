@@ -1,0 +1,107 @@
+<div class="profile-page">
+  <h2>My Account</h2>
+
+  <div class="profile-email">
+    <span class="label">Email</span>
+    <span class="value">{{ (auth.currentUser$ | async)?.email }}</span>
+  </div>
+
+  <div *ngIf="auth.isAdmin()" class="profile-email">
+    <span class="label">Email App</span>
+    <a href="https://privateemail.com/" target="_blank" rel="noopener">privateemail.com</a>
+  </div>
+
+  <form (ngSubmit)="save()" #profileForm="ngForm" class="profile-form">
+    <div class="form-group">
+      <label for="name">Name</label>
+      <input id="name" type="text" [(ngModel)]="name" name="name" required />
+    </div>
+
+    <div class="form-section-heading">Shipping Address</div>
+
+    <div class="form-group">
+      <label for="street1">Street Address</label>
+      <input id="street1" type="text" [(ngModel)]="street1" name="street1" placeholder="123 Main St" />
+    </div>
+
+    <div class="form-group">
+      <label for="street2">Apt / Suite <span class="section-note">* optional</span></label>
+      <input id="street2" type="text" [(ngModel)]="street2" name="street2" placeholder="Apt 4B" />
+    </div>
+
+    <div class="form-group-row">
+      <div class="form-group form-group--city">
+        <label for="city">City</label>
+        <input id="city" type="text" [(ngModel)]="city" name="city" />
+      </div>
+      <div class="form-group form-group--state">
+        <label for="state">State</label>
+        <input id="state" type="text" [(ngModel)]="state" name="state" maxlength="2" placeholder="TX" />
+      </div>
+      <div class="form-group form-group--zip">
+        <label for="zip">ZIP</label>
+        <input id="zip" type="text" [(ngModel)]="zip" name="zip" maxlength="10" placeholder="78701" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="phone">Phone</label>
+      <input id="phone" type="tel" [(ngModel)]="phone" name="phone" />
+    </div>
+
+    <div class="form-group">
+      <label for="paymentNotes">Notes</label>
+      <textarea id="paymentNotes" [(ngModel)]="notes" name="paymentNotes" rows="2"
+                placeholder="e.g. Venmo @handle, PayPal email, etc."></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="preferences">Preferences</label>
+      <textarea id="preferences" [(ngModel)]="preferences" name="preferences" rows="2"></textarea>
+    </div>
+
+    <div class="form-section-heading">
+      Payment &amp; Marketplace Handles
+      <span class="section-note">* For invoicing &amp; reputation</span>
+    </div>
+
+    <div class="form-group form-group-inline">
+      <label for="venmoHandle">Venmo</label>
+      <div class="input-prefix-wrap">
+        <span class="input-prefix">&#64;</span>
+        <input id="venmoHandle" type="text" [(ngModel)]="venmoHandle" name="venmoHandle" placeholder="username" />
+      </div>
+    </div>
+
+    <div class="form-group form-group-inline">
+      <label for="paypalHandle">PayPal</label>
+      <div class="input-prefix-wrap">
+        <span class="input-prefix">&#64;</span>
+        <input id="paypalHandle" type="text" [(ngModel)]="paypalHandle" name="paypalHandle" placeholder="username or email" />
+      </div>
+    </div>
+
+    <div class="form-group form-group-inline">
+      <label for="cashAppHandle">Cash App</label>
+      <div class="input-prefix-wrap">
+        <span class="input-prefix">$</span>
+        <input id="cashAppHandle" type="text" [(ngModel)]="cashAppHandle" name="cashAppHandle" placeholder="cashtag" />
+      </div>
+    </div>
+
+    <div class="form-group form-group-inline">
+      <label for="ebayUsername">eBay</label>
+      <input id="ebayUsername" type="text" [(ngModel)]="ebayUsername" name="ebayUsername" placeholder="username" />
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" [disabled]="saving || !profileForm.valid">
+        {{ saving ? 'Saving…' : 'Save Changes' }}
+      </button>
+    </div>
+
+    <p *ngIf="saveSuccess" class="msg-success">&#10003; Changes saved.</p>
+    <p *ngIf="saveError" class="msg-error">&#10007; {{ saveError }}</p>
+  </form>
+
+</div>

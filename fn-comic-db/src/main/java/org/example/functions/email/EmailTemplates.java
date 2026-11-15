@@ -1,0 +1,264 @@
+package org.example.functions.email;
+
+import org.example.functions.model.ArchivedOrder;
+import org.example.functions.model.ArchivedOrderItem;
+import org.example.functions.model.Cart;
+import org.example.functions.model.CartItem;
+import org.example.functions.model.ShippingAddress;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Plain-text email body builders for customer-facing order notifications.
+ *
+ * <p>This class contains <b>only template construction</b> — pure functions of the input
+ * model. Sending the resulting email (SMTP setup, recipient resolution, error handling)
+ * is the caller's responsibility and is performed via
+ * {@link org.example.functions.service.EmailService}.</p>
+ *
+ * <p>Splitting templates from sending makes the customer-facing copy easy to find for
+ * edits, leaves the door open for moving the bodies to a properties file or a templating
+ * engine later, and keeps {@link org.example.functions.service.CartService} from drowning
+ * in formatting code.</p>
+ */
+public final class EmailTemplates {
+
+    /** A subject + body pair for a single email. */
+    public record Email(String subject, String body) {}
+
+    private EmailTemplates() {}
+
+    // ─── Cart (active order) emails ───────────────────────────────────────────
+
+    /** Sent when a user submits an order — admin still has to mark it paid. */
+    public static Email orderSubmitted(Cart cart) {
+        String orderRef = orderRef(cart.getInvoiceNumber());
+        String body = "Hi " + cart.getUserName() + ",\n\n"
+            + "Thank you for your order! We've received your claim and it is currently being processed.\n\n"
+            + "Lightning Comics Rocks has received a message about your order submittal. "
+            + "In your Orders tab, you will be able to pay with Square or Venmo, "
+            + "or you can email the admin to pay another way.\n\n"
+            + "ORDER SUMMARY " + orderRef + "\n"
+            + "=============\n"
+            + buildOrderItemsText(cart) + "\n"
+            + (cart.getCustomerNotes() != null && !cart.getCustomerNotes().isBlank()
+                ? "Your notes: " + cart.getCustomerNotes() + "\n\n" : "")
+            + buildShippingAddressText(cart.getUserName(), cart.getShippingAddress())
+            + "Thank you for shopping with Lightning Comics!\n";
+        return new Email("Your Order " + orderRef + " is Being Processed", body);
+    }
+
+    /** Sent when admin marks a cart as PAID. */
+    public static Email paymentReceived(Cart cart) {
+        String orderRef = orderRef(cart.getInvoiceNumber());
+        String method = "VENMO".equals(cart.getPaymentMethod()) ? "Venmo" : "card";
+        String body = "Hi " + cart.getUserName() + ",\n\n"
+            + "Great news! We've received your " + method + " payment for order " + orderRef + ".\n\n"
+            + "ORDER RECEIPT " + orderRef + "\n"
+            + "=============\n"
+            + buildOrderItemsText(cart) + "\n"
+            + buildShippingAddressText(cart.getUserName(), cart.getShippingAddress())
+            + "Thank you for your payment!\n\n"
+            + "Lightning Comics\n";
+        return new Email("Payment Received — Order " + orderRef, body);
+    }
+
+    /** Sent when admin marks a cart as FULFILLED — items are on the way. */
+    public static Email fulfillment(Cart cart) {
+        // Build item list, grouping set members under their set name
+        StringBuilder itemsText = new StringBuilder();
+        List<CartItem> nonContainers = cart.getItems().stream()
+            .filter(i -> !i.isSetContainer()).toList();
+        Map<Integer, List<CartItem>> byGroup = new LinkedHashMap<>();
+        List<CartItem> singles = new ArrayList<>();
+        for (CartItem item : nonContainers) {
+            if (item.getCollectionGroup() != null && item.getCollectionGroup() > 0) {
+                byGroup.computeIfAbsent(item.getCollectionGroup(), k -> new ArrayList<>()).add(item);
+            } else {
+                singles.add(item);
+            }
+        }
+        for (CartItem item : singles) {
+            String num = item.getComicNumber() != null ? " " + item.getComicNumber() : "";
+            itemsText.append(String.format("  %s%s  ($%.2f)%n", item.getComicTitle(), num, item.getPrice()));
+        }
+        for (Map.Entry<Integer, List<CartItem>> entry : byGroup.entrySet()) {
+            CartItem container = cart.getItems().stream()
+                .filter(i -> i.isSetContainer() && entry.getKey().equals(i.getCollectionGroup()))
+                .findFirst().orElse(null);
+            String setName = container != null ? container.getComicTitle() : "Set " + entry.getKey();
+            double setTotal = entry.getValue().stream().mapToDouble(CartItem::getPrice).sum();
+            itemsText.append(String.format("  %s (Set)  ($%.2f)%n", setName, setTotal));
+            for (CartItem member : entry.getValue()) {
+                String num = member.getComicNumber() != null ? " " + member.getComicNumber() : "";
+                itemsText.append(String.format("    - %s%s%n", member.getComicTitle(), num));
+            }
+        }
+
+        // Order summary
+        double subtotal = nonContainers.stream().mapToDouble(CartItem::getPrice).sum();
+        double discount = cart.getDiscountAmount();
+        double shipping = cart.getShippingCost();
+        double grandTotal = Math.max(0, subtotal - discount) + shipping;
+
+        StringBuilder summary = new StringBuilder();
+        summary.append(String.format("  Subtotal:  $%.2f%n", subtotal));
+        if (discount > 0) {
+            summary.append(String.format("  Discount:  -$%.2f", discount));
+            if (cart.getDiscountDescription() != null && !cart.getDiscountDescription().isBlank()) {
+                summary.append("  (").append(cart.getDiscountDescription()).append(")");
+            }
+            summary.append("\n");
+        }
+        if (shipping > 0) {
+            summary.append(String.format("  Shipping:  $%.2f%n", shipping));
+        }
+        summary.append(String.format("  Total:     $%.2f%n", grandTotal));
+
+        // Optional sections
+        String trackingLine = (cart.getTrackingNumber() != null && !cart.getTrackingNumber().isBlank())
+            ? "\nTracking Number: " + cart.getTrackingNumber() + "\n"
+            : "";
+        String sellerNotesLine = (cart.getAdminNotes() != null && !cart.getAdminNotes().isBlank())
+            ? "\nNote from seller:\n" + cart.getAdminNotes() + "\n"
+            : "";
+
+        String orderRef = orderRef(cart.getInvoiceNumber());
+        String body = "Hi " + cart.getUserName() + ",\n\n"
+            + "Lightning Comics has fulfilled your order and it's on the way!\n\n"
+            + "ORDER SUMMARY " + orderRef + "\n"
+            + "-----------------------------\n"
+            + itemsText
+            + "\n"
+            + summary
+            + buildShippingAddressText(cart.getUserName(), cart.getShippingAddress())
+            + trackingLine
+            + sellerNotesLine
+            + "\nThank you for your business. We hope you enjoy your comics!\n\n"
+            + "Lightning Comics\n";
+        return new Email("Your Order " + orderRef + " Has Shipped", body);
+    }
+
+    // ─── Archived order emails ────────────────────────────────────────────────
+
+    /** Sent when admin marks an already-archived order as PAID. */
+    public static Email archivedPaymentReceived(ArchivedOrder order) {
+        String orderRef = orderRef(order.getInvoiceNumber());
+        StringBuilder sb = new StringBuilder();
+        double subtotal = 0;
+        for (ArchivedOrderItem item : order.getItems()) {
+            if (item.getPrice() == 0) continue;
+            String num = item.getComicNumber() != null ? " " + item.getComicNumber() : "";
+            sb.append(String.format("  %s%s — $%.2f%n", item.getComicTitle(), num, item.getPrice()));
+            subtotal += item.getPrice();
+        }
+        sb.append(String.format("%nSubtotal: $%.2f%n", subtotal));
+        if (order.getShippingCost() > 0) {
+            sb.append(String.format("Shipping: $%.2f%n", order.getShippingCost()));
+        }
+        if (order.getDiscountAmount() > 0) {
+            String desc = order.getDiscountDescription() != null
+                ? " (" + order.getDiscountDescription() + ")"
+                : "";
+            sb.append(String.format("Discount%s: -$%.2f%n", desc, order.getDiscountAmount()));
+        }
+        double total = subtotal + order.getShippingCost() - order.getDiscountAmount();
+        sb.append(String.format("Total: $%.2f%n", total));
+
+        String body = "Hi " + order.getUserName() + ",\n\n"
+            + "Great news! We've received your payment for order " + orderRef + ".\n\n"
+            + "ORDER RECEIPT " + orderRef + "\n"
+            + "=============\n"
+            + sb + "\n"
+            + "Thank you for your payment!\n\n"
+            + "Lightning Comics\n";
+        return new Email("Payment Received — Order " + orderRef, body);
+    }
+
+    /** Sent to admin + customer when user clicks "I've Sent the Payment" via Venmo. */
+    public static Email venmoPaymentSent(Cart cart) {
+        String orderRef = orderRef(cart.getInvoiceNumber());
+        double total = Math.max(0, cart.getItems().stream()
+            .filter(i -> !i.isSetContainer())
+            .mapToDouble(CartItem::getPrice).sum()
+            - cart.getDiscountAmount()) + cart.getShippingCost();
+        String adminBody = cart.getUserName() + " (" + cart.getUserEmail() + ") says they've sent"
+            + " $" + String.format("%.2f", total) + " via Venmo for order " + orderRef + ".\n\n"
+            + "Check your Venmo app (@John-Doe) and mark the order as paid once confirmed.\n";
+        String customerBody = "Hi " + cart.getUserName() + ",\n\n"
+            + "We've received notification that you've sent your Venmo payment for order " + orderRef + ".\n\n"
+            + "We'll mark your order as paid once we confirm receipt in our Venmo app. "
+            + "You'll receive a payment confirmation email shortly after.\n\n"
+            + "Lightning Comics\n";
+        // Returns admin-facing version; caller sends both via overloads
+        return new Email("Venmo Payment Sent — Order " + orderRef + " (action required)", adminBody);
+    }
+
+    /** Customer-facing companion to {@link #venmoPaymentSent}. */
+    public static Email venmoPaymentSentCustomer(Cart cart) {
+        String orderRef = orderRef(cart.getInvoiceNumber());
+        double total = Math.max(0, cart.getItems().stream()
+            .filter(i -> !i.isSetContainer())
+            .mapToDouble(CartItem::getPrice).sum()
+            - cart.getDiscountAmount()) + cart.getShippingCost();
+        String body = "Hi " + cart.getUserName() + ",\n\n"
+            + "We've received notification that you've sent $" + String.format("%.2f", total)
+            + " via Venmo for order " + orderRef + ".\n\n"
+            + "We'll mark your order as paid once we confirm receipt in our Venmo app. "
+            + "You'll receive a payment confirmation email shortly after.\n\n"
+            + "Lightning Comics\n";
+        return new Email("Venmo Payment Received — Order " + orderRef, body);
+    }
+
+    // ─── Shared helpers ───────────────────────────────────────────────────────
+
+    /** Returns "[XX123456]" or empty string when invoiceNumber is null. */
+    private static String orderRef(String invoiceNumber) {
+        return invoiceNumber != null && !invoiceNumber.isBlank() ? "[" + invoiceNumber + "]" : "";
+    }
+
+    /** Formats a shipping address block for inclusion in emails. Returns empty string if no address. */
+    private static String buildShippingAddressText(String recipientName, ShippingAddress address) {
+        if (address == null) return "";
+        StringBuilder sb = new StringBuilder("\nSHIP TO\n-------\n");
+        sb.append(recipientName).append("\n");
+        sb.append(address.getStreet1()).append("\n");
+        if (address.getStreet2() != null && !address.getStreet2().isBlank()) {
+            sb.append(address.getStreet2()).append("\n");
+        }
+        sb.append(address.getCity()).append(", ").append(address.getState()).append(" ").append(address.getZip()).append("\n");
+        if (address.getPhone() != null && !address.getPhone().isBlank()) {
+            sb.append(address.getPhone()).append("\n");
+        }
+        sb.append("\n");
+        return sb.toString();
+    }
+
+    /** Itemized list + subtotal/shipping/discount/total block used by Cart-based emails. */
+    private static String buildOrderItemsText(Cart cart) {
+        StringBuilder sb = new StringBuilder();
+        double subtotal = 0;
+        for (CartItem item : cart.getItems()) {
+            if (item.isSetContainer()) continue;
+            String num = item.getComicNumber() != null ? " " + item.getComicNumber() : "";
+            sb.append(String.format("  %s%s — $%.2f%n", item.getComicTitle(), num, item.getPrice()));
+            subtotal += item.getPrice();
+        }
+        sb.append(String.format("%nSubtotal: $%.2f%n", subtotal));
+        if (cart.getShippingCost() > 0) {
+            sb.append(String.format("Shipping: $%.2f%n", cart.getShippingCost()));
+        }
+        if (cart.getDiscountAmount() > 0) {
+            String desc = cart.getDiscountDescription() != null
+                ? " (" + cart.getDiscountDescription() + ")"
+                : "";
+            sb.append(String.format("Discount%s: -$%.2f%n", desc, cart.getDiscountAmount()));
+        }
+        double total = subtotal + cart.getShippingCost() - cart.getDiscountAmount();
+        sb.append(String.format("Total: $%.2f%n", total));
+        return sb.toString();
+    }
+}

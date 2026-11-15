@@ -1,0 +1,312 @@
+.app-header {
+  background-color: #6c584c;
+  color: #f0ead2;
+  height: 98px;
+  box-shadow: 0 2px 8px rgba(108,88,76,0.3);
+}
+
+.header-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  height: 100%;
+  display: flex;
+  align-items: stretch;
+}
+
+.header-logo {
+  display: flex;
+  align-items: center;
+  padding-right: 1.5rem;
+  border-right: 1px solid rgba(240,234,210,0.2);
+  margin-right: 1.5rem;
+  flex-shrink: 0;
+}
+
+.logo-img {
+  height: 64px;
+  width: auto;
+  display: block;
+}
+
+/* Center section: title + nav */
+.header-center {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-end;
+  flex: 1;
+  gap: 10px;
+}
+
+.header-title {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.2;
+}
+
+.header-title-line1 {
+  font-family: var(--font-comic);
+  font-size: 1.7rem;
+  font-weight: var(--fw-bold);
+  color: #adc178;
+  letter-spacing: 0.05em;
+}
+
+.header-title-since {
+  display: block;
+  font-size: 0.6rem;
+  font-weight: 400;
+  font-style: italic;
+  color: rgba(173, 193, 120, 0.65);
+  letter-spacing: 0.02em;
+}
+
+/* Right section: avatar + dropdown */
+.header-user {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding-left: 1.25rem;
+  margin-left: 1rem;
+  border-left: 1px solid rgba(240,234,210,0.2);
+  flex-shrink: 0;
+}
+
+.avatar-btn {
+  background: none;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.avatar-btn:hover,
+.avatar-btn.open {
+  border-color: #adc178;
+  background-color: rgba(173,193,120,0.15);
+}
+
+.avatar-icon {
+  width: 70px;
+  height: 70px;
+  display: block;
+  opacity: 0.85;
+}
+
+.profile-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background: #7b8f4b;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  min-width: 180px;
+  /* Sits above page content but below modals. --z-dropdown = 100. */
+  z-index: var(--z-dropdown);
+  overflow: hidden;
+}
+
+
+.dropdown-name {
+  padding: 0.6rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #000;
+  border-bottom: 1px solid #eee;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 0.6rem 1rem;
+  font-size: 0.9rem;
+  color: #444;
+  text-decoration: none;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s;
+  box-sizing: border-box;
+}
+
+.dropdown-item:hover {
+  background-color: #f5f5f5;
+  color: #222;
+}
+
+.dropdown-logout {
+  border-top: 1px solid #eee;
+}
+
+.dropdown-logout:hover {
+  background-color: #f5f5f5;
+}
+
+
+nav {
+  display: flex;
+  gap: 0.25rem;
+}
+
+nav a {
+  color: var(--color-text);                       /* Bark — dark, AA on light pill */
+  text-decoration: none;
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: background-color var(--duration-base) var(--ease-standard),
+              color var(--duration-base) var(--ease-standard);
+  background-color: rgba(240, 234, 210, 0.92);    /* near-Parchment pill */
+  margin: 0;
+}
+
+nav a:hover {
+  background-color: var(--parchment);             /* full Parchment on hover */
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+nav a.active {
+  background-color: var(--sage);                  /* Sage fill marks current route */
+  color: var(--color-text);                       /* Bark on Sage = 3.72:1, AA-large; weight 600 keeps it readable */
+  box-shadow: inset 0 -2px 0 var(--olive-dark);   /* subtle dark underline so the active state pops without darkening text */
+}
+
+.storage-warning-banner {
+  background: #fff3cd;
+  border-bottom: 2px solid #e6a817;
+  color: #7d5a00;
+  padding: 10px 24px;
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.app-main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0.75rem 1.5rem 2rem;
+}
+
+.nav-pause-btn {
+  background: transparent;
+  color: rgba(240,234,210,0.65);
+  border: 1px solid rgba(240,234,210,0.3);
+  border-radius: 4px;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 0;
+  margin-right: 0;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.nav-pause-btn:hover {
+  background: rgba(240,234,210,0.1);
+  color: rgba(240,234,210,0.95);
+  border-color: rgba(240,234,210,0.5);
+}
+
+.nav-pause-btn-active {
+  background: rgba(169,132,103,0.2);
+  color: #a98467;
+  border-color: #a98467;
+}
+
+.nav-pause-btn-active:hover {
+  background: rgba(169,132,103,0.3);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Mobile header layout
+   On narrow viewports, we collapse the three header columns onto two rows:
+     Row 1: [logo]                                       [user avatar]
+     Row 2:               [title + nav (centered)]
+   This is CSS-only — no hamburger toggle, no TS changes. The full nav wraps
+   below the logo via flex-wrap; if the nav gets long it wraps onto more rows.
+   If you decide later you want a true hamburger collapse, that's a TS change
+   (toggle state + open/close behavior) — flagging now.
+   ────────────────────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .app-header {
+    height: auto;
+    padding: 8px 0 12px;
+  }
+
+  .header-inner {
+    flex-wrap: wrap;
+    padding: 0 12px;
+    align-items: center;
+    row-gap: 10px;
+  }
+
+  .header-logo {
+    border-right: none;
+    margin-right: 0;
+    padding-right: 0;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .logo-img {
+    height: 56px;          /* was filling 98px header — clamp on mobile */
+    max-width: 100%;
+  }
+
+  .header-user {
+    border-left: none;
+    margin-left: 0;
+    padding-left: 0;
+    flex: 0 0 auto;
+  }
+
+  .header-center {
+    /* Force the title + nav onto its own row below the logo / user row. */
+    flex: 0 0 100%;
+    order: 3;
+    align-items: center;
+  }
+
+  .header-title {
+    align-items: center;
+  }
+
+  .header-title-line1 {
+    font-size: 1rem;
+  }
+
+  nav {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+  }
+
+  nav a {
+    font-size: 0.85rem;
+    padding: 0.3rem 0.7rem;
+  }
+
+  /* Profile dropdown anchored to viewport edge on mobile so it doesn't
+     overflow off-screen when the avatar sits hard against the right edge. */
+  .profile-dropdown {
+    right: 8px;
+  }
+
+  .app-main {
+    padding: 0.75rem 12px 1.5rem;
+  }
+}
+

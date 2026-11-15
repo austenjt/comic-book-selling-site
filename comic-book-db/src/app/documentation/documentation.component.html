@@ -1,0 +1,644 @@
+<div class="hiw-container">
+
+  <div class="hiw-hero">
+    <h1>Documentation</h1>
+    <p class="hiw-subtitle">Everything you need to know about browsing, claiming, and ordering.</p>
+    <div class="hiw-actions">
+      <a routerLink="/selling" class="hiw-btn hiw-btn-secondary">Browse Comics</a>
+    </div>
+  </div>
+
+  <!-- ── Buyer Sections ───────────────────────────────────────────────── -->
+  <div class="hiw-section-label">For Buyers</div>
+
+  <section class="hiw-section" id="getting-access">
+    <h2>Getting Access</h2>
+    <p>
+      I am a private seller, selling from my personal collection, and so you'll need an approved account before you can claim anything.
+      Anyone can browse the catalogue, but only approved buyers see the Claim button.
+    </p>
+    <ol>
+      <li>
+        <strong>Sign in</strong> — click <a routerLink="/login">Sign In</a> and log in with your
+        example.com account. If this is your first visit, your account request will be sent to the seller
+        for approval.
+      </li>
+      <li>
+        <strong>Wait for approval</strong> — the seller reviews your request. Once approved, you'll
+        receive an email confirmation. Sign in again to access the site.
+      </li>
+      <li>
+        <strong>Fill out your profile</strong> — after logging in, visit your
+        <a routerLink="/profile">Profile</a> page to add your shipping address, phone number,
+        and preferred payment handles.
+      </li>
+    </ol>
+  </section>
+
+  <section class="hiw-section" id="selling">
+    <h2>The Selling Page</h2>
+    <p>
+      The <a routerLink="/selling">Selling page</a> is the main catalog — every comic currently
+      available for sale shown as a card with cover image, title, series, grade, and price.
+    </p>
+    <ul>
+      <li>
+        <strong>Available comics</strong> show a green <em>Claim</em> button if you're logged in as
+        an approved buyer.
+      </li>
+      <li>
+        <strong>Claimed comics</strong> show a grey <em>Claimed</em> label — they're in someone
+        else's active cart. If that order falls through, the book may become available again.
+      </li>
+      <li>
+        <strong>Comics in your cart</strong> show a green <em>In Your Cart</em> label.
+      </li>
+      <li>
+        <strong>Sets</strong> appear with an orange <em>Set N</em> badge. Clicking a set card
+        opens the set's detail page.
+      </li>
+    </ul>
+    <p>
+      Use the search bar to filter by title or series. Use the sort dropdown to order comics by
+      <em>Oldest First</em>, <em>Newest First</em>, <em>A–Z Sort</em>, <em>Z–A Sort</em>,
+      <em>Highest Price</em>, <em>Lowest Price</em>, or <em>Claimed First</em>.
+      The selling page filter buttons let you hide already-claimed items or hide unpriced items.
+    </p>
+  </section>
+
+  <section class="hiw-section" id="sets">
+    <h2>Sets</h2>
+    <p>
+      A <strong>Set</strong> is a bundle of comics sold together as a single unit — ideal for runs,
+      lots, or curated groups the seller wants to keep together. You cannot buy individual books out
+      of a set; it's all-or-nothing.
+    </p>
+    <p>The <strong>Set Detail page</strong> shows:</p>
+    <ul>
+      <li>A cover image and description for the set</li>
+      <li>The full list of member books with their individual grades and prices</li>
+      <li>The combined total price for the whole set</li>
+      <li>A <em>Claim Set</em> button (if you're an approved buyer and the set is available)</li>
+    </ul>
+    <p>
+      When you claim a set, every book in the bundle is added to your cart at once, each tagged with
+      the orange <em>Set N</em> badge. You cannot remove individual books from a set; if you need
+      to release a claimed set, contact the seller directly.
+      All books in a set must be priced before the <em>Claim Set</em> button appears.
+    </p>
+  </section>
+
+  <section class="hiw-section" id="comic-detail">
+    <h2>Comic Detail Pages</h2>
+    <p>
+      Click any comic card on the selling page to open its detail page. Here you'll find:
+    </p>
+    <ul>
+      <li>High-resolution front and back cover images</li>
+      <li>Title, series, issue number, publisher, and publication date</li>
+      <li>Grading details — CGC/CBCS certification number and grade, or estimated grade for raw copies</li>
+      <li>Page quality, pedigree, restoration notes, and signatures if applicable</li>
+      <li>Sale price and any public notes from the seller</li>
+      <li>GoCollect and Grand Comics Database links if available</li>
+    </ul>
+    <p>
+      The <em>Claim</em> and <em>Release</em> buttons are also available on the detail page so you
+      can review a book fully before adding it to your cart.
+    </p>
+  </section>
+
+  <section class="hiw-section" id="your-cart">
+    <h2>Your Cart</h2>
+    <p>
+      Your cart lives at <a routerLink="/orders">Orders</a> in the navigation. Every book you
+      claim goes here. The cart moves through a few stages:
+    </p>
+    <ol>
+      <li>
+        <strong>Open</strong> — freely add and remove comics. No time limit.
+      </li>
+      <li>
+        <strong>Submitted (review window)</strong> — click <em>Submit Order</em> when you're done.
+        This starts a short review period set by the seller. During this window you can still remove
+        items but cannot add new ones. Any applicable discounts are calculated and shown here.
+      </li>
+      <li>
+        <strong>Checkout</strong> — after submitting, three buttons appear: <em>Shipping</em>,
+        <em>Pay Now</em>, and <em>Pay Later</em>. Start by clicking <strong>Shipping</strong> to
+        enter your mailing address. Once your address is saved, the Shipping button turns grey and
+        Pay Now / Pay Later become enabled. Click <strong>Pay Now</strong> to pay immediately with a
+        credit or debit card via Square, or <strong>Pay Later</strong> to let the seller contact you
+        about payment arrangements (Venmo, PayPal, etc.).
+      </li>
+      <li>
+        <strong>Finalized</strong> — once the review window expires, your cart locks automatically.
+        The checkout buttons remain available until payment is complete.
+      </li>
+      <li>
+        <strong>Fulfilled</strong> — once the seller marks your order as fulfilled, the cart closes.
+        You can then start a new cart and claim again.
+      </li>
+    </ol>
+    <p>
+      If a discount applies, you'll see a <em>Discount</em> line in your cart summary with the
+      amount saved and a description of the rule applied. Discounts are recalculated automatically
+      if you remove items from a submitted cart.
+    </p>
+    <p>
+      Set items are grouped with an orange <em>Set N</em> badge. You cannot remove individual books
+      from a set — contact the seller if you need to release a claimed set.
+    </p>
+  </section>
+
+  <section class="hiw-section" id="orders">
+    <h2>Orders</h2>
+    <p>
+      The <a routerLink="/orders">Orders page</a> shows your complete order history — every fulfilled
+      order with its line items, prices, and totals. This history is permanently archived and will
+      never be lost, even if the seller resets the catalogue between sale events.
+    </p>
+  </section>
+
+  <section class="hiw-section" id="trade-in">
+    <h2>Trade-In Program</h2>
+    <p>
+      We are actively looking to add certain comics to our collection. If you own a copy of one of
+      those comics, you can offer it as a <strong>trade-in credit</strong> toward your order — reducing
+      what you owe. The credit amount is calculated automatically based on the condition of your copy.
+    </p>
+
+    <h3>Finding WANTED Comics</h3>
+    <p>
+      There are two ways to browse comics we want:
+    </p>
+    <ul>
+      <li>
+        <strong>Trade Board</strong> (<a routerLink="/trade">example.com/trade</a>) — a
+        dedicated page showing all WANTED comics as cards with cover image, title, expected value,
+        and an <em>Offer Trade</em> button. If another buyer has already submitted an offer on a comic,
+        the button shows <em>Offered</em> and is disabled.
+      </li>
+      <li>
+        <strong>Comic Detail page</strong> — WANTED comics look slightly different from For-Sale
+        comics: there is no sale price displayed and no <em>Claim</em> button. Instead, a
+        <em>Trade Status</em> section appears with a grade selector and a <em>Trade</em> button, along
+        with a <em>Trade Info</em> section showing the expected value and any offer details.
+      </li>
+    </ul>
+
+    <h3>How the Credit is Calculated</h3>
+    <p>
+      Each WANTED comic has an <strong>Expected Value</strong> — the reference price for a
+      Near Mint (9.4) copy. Your trade credit is calculated as:
+    </p>
+    <p><em>Trade Credit = Expected Value × Grade Multiplier</em></p>
+    <p>
+      Higher-grade copies earn a premium multiplier; lower grades receive less. For example, a Gem
+      Mint 10.0 copy earns 3.5× the expected value, while a Near Mint 9.4 earns 1.0×. You can see the
+      calculated credit <strong>before you commit</strong> — it updates live as you select a grade
+      from the dropdown on either the Comic Detail page or the Trade Board popup.
+    </p>
+
+    <h3>Submitting a Trade Offer</h3>
+    <ol>
+      <li>
+        <strong>Select your grade</strong> — on the Comic Detail page, choose your copy's condition
+        from the <em>Your Grade</em> dropdown. The <em>Trade Credit</em> updates immediately. On the
+        Trade Board, click <em>Offer Trade</em> to open a popup with the same grade selector and
+        live credit preview.
+      </li>
+      <li>
+        <strong>Click Trade / Add to Cart</strong> — this adds the WANTED comic to your cart as a
+        trade-in credit line. The credit appears as a negative amount and reduces your cart total.
+        Only one trade item is allowed per order; attempting to add a second will show an error.
+      </li>
+      <li>
+        <strong>Upload photos of your copy</strong> — after adding the trade item, open the Comic
+        Detail page for that WANTED comic. You will see <em>Upload Your Copy — Front</em> and
+        <em>Upload Your Copy — Back</em> buttons below the cover image (switch to the Back tab for
+        the back photo). Upload clear, well-lit photos so we can verify the grade before approving
+        the offer.
+      </li>
+      <li>
+        <strong>Add items to buy</strong> — continue browsing and claim any comics you want to
+        purchase. Your cart total reflects the trade credit automatically.
+      </li>
+      <li>
+        <strong>Submit your order</strong> — click <em>Submit Order</em> from your cart when ready.
+        Note: if the trade credit exceeds your cart total, submission is blocked — add more items
+        first so the remaining balance is non-negative.
+      </li>
+    </ol>
+
+    <h3>After You Submit</h3>
+    <ol>
+      <li>
+        <strong>Offer review</strong> — we review your offer, the photos you uploaded, and the grade
+        you selected. The <em>Trade Info</em> section on the comic's detail page will update to show
+        whether the offer has been accepted.
+      </li>
+      <li>
+        <strong>Ship your copy to us</strong> — once accepted, we will contact you with our mailing
+        address and packing instructions. Ship your comic so it arrives safely.
+      </li>
+      <li>
+        <strong>We verify receipt</strong> — once we receive and inspect your copy, the <em>Trade
+        Received</em> status on the detail page will update to <em>Yes</em>. At this point your cart
+        is unblocked for fulfillment.
+      </li>
+      <li>
+        <strong>Pay your balance</strong> — use the Pay Now or Pay Later button in your cart to
+        settle any remaining amount owed after the trade credit is applied.
+      </li>
+      <li>
+        <strong>We ship your order</strong> — once payment is confirmed your order is fulfilled and
+        shipped to you.
+      </li>
+    </ol>
+
+    <h3>Trade Info Section</h3>
+    <p>
+      The <em>Trade Info</em> section on a WANTED comic's detail page is visible to everyone and
+      shows the current state of any offer:
+    </p>
+    <ul>
+      <li><strong>Expected Value</strong> — the reference price used for credit calculation</li>
+      <li><strong>Offered Grade</strong> — the grade submitted with the trade offer</li>
+      <li><strong>Trade Credit</strong> — the dollar amount of credit calculated at offer time</li>
+      <li><strong>Offer Accepted</strong> — whether we have reviewed and accepted the offer</li>
+      <li><strong>Trade Received</strong> — whether your physical copy has arrived with us</li>
+      <li><strong>Notes</strong> — any notes about the offer from our team</li>
+    </ul>
+  </section>
+
+  <section class="hiw-section" id="live-notifications">
+    <h2>Live Notifications</h2>
+    <p>
+      The app polls for activity every few seconds and records events in the <strong>Logs panel</strong>
+      at the bottom of the selling page. Click <em>Logs</em> in the footer to expand it.
+    </p>
+    <ul>
+      <li>When <strong>someone claims</strong> a comic: <em>"Title #N" added to cart of user UserName — $XX</em></li>
+      <li>When the seller <strong>awards</strong> a comic: <em>"Title #N" awarded to UserName — FREE!</em></li>
+      <li>When a comic is <strong>returned to sale</strong>: <em>"Title #N" Returned to sale</em> — useful for spotting books you missed coming back available</li>
+    </ul>
+    <p>
+      Log entries are timestamped and persist across page refreshes, so you can review recent
+      activity even if you were away for a moment.
+    </p>
+  </section>
+
+  <section class="hiw-section" id="your-profile">
+    <h2>Your Profile</h2>
+    <p>
+      Your <a routerLink="/profile">Profile page</a> lets you update your contact details at any
+      time — name, phone number, and payment handles (Venmo, PayPal, Cash App, eBay). You can also
+      save a shipping address with structured fields: street address, optional apartment/suite,
+      city, state, and ZIP. Keeping this current saves time at checkout — the Shipping modal
+      pre-fills from your saved address so you only need to confirm it.
+    </p>
+  </section>
+
+  <section class="hiw-section" id="payment">
+    <h2>Payment</h2>
+    <p>
+      Two payment options are available after you save your shipping address:
+    </p>
+    <ul>
+      <li>
+        <strong>Pay Now</strong> — pay immediately with a credit or debit card using the
+        Square-powered checkout. Your card is processed securely and the seller is notified
+        automatically once payment is confirmed.
+      </li>
+      <li>
+        <strong>Pay Later</strong> — choose this if you prefer to pay via Venmo, PayPal,
+        Cash App, or another arrangement. The seller will reach out to confirm the total and
+        coordinate payment directly. Add your preferred handles to your profile so the seller
+        knows how to contact you.
+      </li>
+    </ul>
+    <p>
+      Once payment is received, the Pay Now button changes to <em>Paid ✓</em> and both payment
+      buttons are disabled for the remainder of the order.
+    </p>
+  </section>
+
+  <section class="hiw-section" id="contact">
+    <h2>Contact</h2>
+    <p>
+      The <a routerLink="/contact">Contact page</a> is the best way to reach the seller outside of
+      a formal order — ask about a listing, make an offer, or inquire about something not currently
+      in the catalogue. You do not need to be logged in to use the contact form.
+    </p>
+  </section>
+
+  <!-- ── Admin Sections ────────────────────────────────────────────────── -->
+  <div class="hiw-admin-divider"><span>Admin Reference</span></div>
+
+  <section class="hiw-section hiw-admin" id="admin-selling">
+    <h2>Selling Page (Admin View)</h2>
+    <p>
+      When logged in as Admin, the selling page shows additional controls on each comic card when
+      <strong>Award Mode</strong> is enabled (toggled from the Sales page).
+    </p>
+    <ul>
+      <li>
+        <strong>Award button</strong> — opens a modal listing all approved users. Selecting a user
+        immediately adds the comic to their cart at <strong>$0.00</strong>. If the user has no active
+        cart, one is created. The Award button is hidden when a comic is already claimed or has a CGC or
+        CBCS grade.
+      </li>
+    </ul>
+  </section>
+
+  <section class="hiw-section hiw-admin" id="admin-orders">
+    <h2>Manage Orders</h2>
+    <p>
+      The <strong>Manage Orders</strong> screen is split into three sections: <em>Active Orders</em>
+      (submitted and finalized carts), <em>Open Shopping Carts</em> (carts with items that haven't
+      been submitted yet), and <em>Order Archive</em> (permanently fulfilled orders).
+    </p>
+    <ul>
+      <li>
+        <strong>Release</strong> — removes a standalone comic from a buyer's cart and returns it to
+        sale. A <em>"Returned to sale"</em> log entry is recorded in real time.
+        Set items do not have a Release button; contact the buyer if a set needs to be released.
+      </li>
+      <li>
+        <strong>Shipping address</strong> — if the buyer entered a shipping address during checkout,
+        it appears on the order card as a <em>Ship to:</em> block so you can prepare the shipment
+        without contacting the buyer separately.
+      </li>
+      <li>
+        <strong>Payment status</strong> — a dropdown on each order lets you mark it as
+        <em>Unpaid</em> or <em>Paid</em>. Marking a Submitted order as Paid also enables
+        the <em>Mark as Fulfilled</em> button early (before the review window expires).
+      </li>
+      <li>
+        <strong>Admin notes</strong> — a private text area on each order for internal notes
+        visible only to you. Saved independently of the order status.
+      </li>
+      <li>
+        <strong>UnSubmit</strong> — reverts a submitted order back to Open so the buyer can add or
+        remove items. Useful when a buyer needs to make changes after submitting.
+      </li>
+      <li>
+        <strong>Mark as Fulfilled</strong> — enabled once a cart reaches <em>Finalized</em> status,
+        or earlier if the order is still Submitted but payment has been marked as Paid. Uses a
+        two-click confirmation. The second click permanently archives the order, stamps each comic
+        with the buyer's name and sold date, and removes them from the selling page.
+      </li>
+    </ul>
+    <p>
+      Carts transition from <em>Submitted</em> to <em>Finalized</em> lazily — on the next page load
+      after the review window expires. The window length is controlled by the
+      <code>FINALIZE_HOURS</code> environment variable (default 20 hours).
+    </p>
+    <p>The <strong>Order Archive</strong> section has two delete options:</p>
+    <ul>
+      <li>
+        <strong>Delete</strong> — removes only the archived order record. The comics remain in
+        the database.
+      </li>
+      <li>
+        <strong>Full Delete</strong> — only appears on orders containing a set. Removes the
+        archived order record <em>and</em> permanently deletes all comics in the associated set
+        from the database.
+      </li>
+    </ul>
+    <p>Order Archive records are never touched by a database reset — the full sales history is always preserved.</p>
+  </section>
+
+  <section class="hiw-section hiw-admin" id="admin-sales">
+    <h2>Sales &amp; Discounts</h2>
+    <p>
+      The <strong>Sales</strong> page lets you configure discount rules automatically applied when
+      a buyer submits their order. Multiple active rules stack. Discounts are snapshotted at submit
+      time, so historical totals are preserved even if you later change the rules.
+    </p>
+    <p>Three discount types are supported:</p>
+    <ul>
+      <li>
+        <strong>Flat Percentage Off</strong> (<em>RAW_PERCENTAGE</em>) — deducts a fixed
+        percentage from the cart subtotal. Example: 10% off everything.
+      </li>
+      <li>
+        <strong>Buy X Get One Free</strong> (<em>BUY_X_GET_ONE_FREE</em>) — for every group
+        of X+1 books, the cheapest book in that group is free. Example: Buy 4, get the 5th free.
+      </li>
+      <li>
+        <strong>Percent Off Over X Books</strong> (<em>PERCENT_OFF_OVER_X_BOOKS</em>) — flat
+        percentage off when the cart contains more than X books. Example: 10% off over 5 books means
+        a 6-book cart gets 10% off; a 4-book cart gets nothing.
+      </li>
+    </ul>
+    <p>
+      Awarded items ($0.00) are always excluded from discount calculations. Each rule can be toggled
+      active or inactive without deleting it.
+    </p>
+    <p>
+      Each discount rule has an optional <strong>Exclude Sets</strong> flag. When checked, comics
+      that are part of a set (i.e. claimed together as a group) are excluded from both the item
+      count threshold and the discount savings for that rule. This lets you run a buy-X-get-one-free
+      or percentage deal that only applies to individual single comics, not set bundles.
+    </p>
+    <p>
+      This page also lets you toggle <strong>Award Mode</strong> — when enabled, an Award button
+      appears on unclaimed comics on the selling page.
+    </p>
+    <h3>Reset Database</h3>
+    <p>
+      At the bottom of the Sales page is a <strong>Reset Database</strong> section, intended for
+      use between sale events. Type <code>RESET</code> to confirm. This will:
+    </p>
+    <ul>
+      <li>Archive any fulfilled carts not yet archived (order history is preserved)</li>
+      <li>Delete all active carts and discounts</li>
+      <li>Delete all comics and their associated images</li>
+      <li>Delete all sessions except your own (so you stay logged in)</li>
+    </ul>
+    <p>The Order Archive is never touched by a reset.</p>
+  </section>
+
+  <section class="hiw-section hiw-admin" id="admin-users">
+    <h2>User Admin</h2>
+    <p>
+      The <strong>User Admin</strong> screen shows pending account requests at the top and approved
+      users in cards below.
+    </p>
+    <ul>
+      <li>
+        <strong>Approve</strong> — approves a pending request, generates a PIN, and moves the user
+        to the approved list. A modal displays the new PIN — copy it and send it directly to the
+        buyer. It will not be shown again.
+      </li>
+      <li>
+        <strong>Reset PIN</strong> — generates a brand-new PIN for an existing user. The same modal
+        appears with the new PIN. The old PIN stops working immediately.
+      </li>
+      <li>
+        <strong>Suspend / Reactivate</strong> — suspending a user blocks their login immediately
+        without deleting their account. Reactivating restores access.
+      </li>
+    </ul>
+    <p>
+      The admin account row does not show Reset PIN or Suspend controls — it displays
+      <em>Admin</em> in the actions area instead.
+    </p>
+  </section>
+
+  <section class="hiw-section hiw-admin" id="admin-comics">
+    <h2>Comics Management</h2>
+    <p>
+      The <strong>Comics Management</strong> screen is a full-featured data grid showing every
+      comic in the database. Each row is directly editable — click any cell to update it and the
+      change saves automatically.
+    </p>
+    <ul>
+      <li>
+        <strong>For Sale</strong> — controls whether a comic appears on the buyer-facing selling page.
+        Unchecking it hides the comic immediately without deleting it.
+      </li>
+      <li>
+        <strong>Sale Price vs Target Price</strong> — Target Price is your internal reference;
+        Sale Price is what buyers see on the selling page and pay in their cart. Books without a Sale
+        Price do not show a Claim button.
+      </li>
+      <li>
+        <strong>Date fields</strong> — Date Acquired, Published Date, and Date Sold use YYYY-MM-DD
+        format. Setting a Date Sold automatically hides the comic from the selling page.
+      </li>
+      <li>
+        <strong>Quick Add</strong> — use the Quick Add wizard at the top of the page to add a new
+        comic with the most common fields in a two-step form.
+      </li>
+      <li>
+        <strong>Delete</strong> — the delete icon on the left permanently removes the comic,
+        deletes all associated images, and releases it from any active carts.
+      </li>
+    </ul>
+    <h3>Sets Management</h3>
+    <ul>
+      <li>
+        <strong>Add Set</strong> — creates a new set container. Give it a title, series, cover
+        image, and public notes. The container is priced at $0; the total shown to buyers is the
+        sum of member books' sale prices.
+      </li>
+      <li>
+        <strong>Add to Set</strong> — assigns an existing standalone comic to a set. The comic
+        becomes a member and no longer appears as a standalone item on the selling page.
+      </li>
+      <li>
+        <strong>Delete Set</strong> — removes the set container and ungroups its members, making
+        them standalone again. Blocked if any member is in an active cart or if the set appears
+        in a fulfilled archived order (use <strong>Full Delete</strong> on that order instead).
+      </li>
+    </ul>
+  </section>
+
+  <section class="hiw-section hiw-admin" id="admin-comic-detail">
+    <h2>Comic Detail Page (Admin View)</h2>
+    <p>
+      Admin detail pages include image management controls below the cover image.
+    </p>
+    <ul>
+      <li>
+        <strong>Update Front Cover</strong> — uploads a new front cover image. Automatically resized
+        if very large; a small thumbnail is generated for the selling page.
+      </li>
+      <li>
+        <strong>Update Back Cover</strong> — uploads a back cover image. This section only appears
+        after a front cover has been uploaded.
+      </li>
+    </ul>
+    <p>
+      Uploaded images are stored with metadata (comic ID, title, series, issue number) attached
+      to each image record.
+    </p>
+  </section>
+
+  <section class="hiw-section hiw-admin" id="admin-trade">
+    <h2>Managing Trade-In Offers</h2>
+    <p>
+      WANTED comics are managed through the Listing type field on each comic's detail page. When a
+      buyer submits a trade offer, all offer details are recorded on the comic document and visible
+      in the <em>Trade Info</em> section — no separate orders screen is needed.
+    </p>
+
+    <h3>Marking a Comic as WANTED</h3>
+    <ol>
+      <li>
+        Open the comic's detail page while logged in as admin and scroll to the <em>Sale Info</em>
+        section.
+      </li>
+      <li>
+        Set <strong>Listing</strong> to <em>Wanted</em>. The comic disappears from the buyer
+        selling page and appears on the Trade Board instead.
+      </li>
+      <li>
+        Set the <strong>Expected Value</strong> in the <em>Trade Info</em> section — this is
+        the reference price used to calculate trade credits. Without this value, buyers cannot
+        submit a trade offer (the <em>Trade</em> button is disabled).
+      </li>
+      <li>Click <strong>Save</strong>.</li>
+    </ol>
+
+    <h3>Reviewing an Offer</h3>
+    <p>
+      When a buyer submits a trade offer, the <em>Trade Info</em> section on the comic's detail page
+      is automatically populated with:
+    </p>
+    <ul>
+      <li><strong>Offered Grade</strong> — the condition the buyer reported for their copy</li>
+      <li><strong>Trade Credit</strong> — the calculated credit amount at that grade</li>
+      <li><strong>Offered By</strong> — the buyer's name or email</li>
+      <li><strong>Offered At</strong> — timestamp of when the offer was submitted</li>
+    </ul>
+    <p>
+      The buyer also uploads front and back photos of their copy, which are stored and viewable by
+      scrolling to the front/back thumbnail on the detail page.
+    </p>
+    <p>
+      To accept the offer, check <strong>Offer Accepted</strong> in the Trade Info section and click
+      Save. Contact the buyer with your mailing address so they can ship their copy.
+    </p>
+
+    <h3>Confirming Receipt</h3>
+    <p>
+      Once the buyer's comic arrives and you have inspected it, check <strong>Trade Received</strong>
+      in the Trade Info section and click Save. This unblocks fulfillment for any cart that contains
+      a trade item for this comic. The status is visible to the buyer on the comic's detail page so
+      they know their copy has arrived.
+    </p>
+
+    <h3>Trade-In Items in Orders</h3>
+    <p>
+      Trade-in items appear in the buyer's cart and in your <em>Manage Orders</em> screen as a line
+      with a negative price (the credit amount). They are excluded from discount calculations and do
+      not trigger the <em>soldTo</em> stamp on fulfillment — the comic remains in your database in
+      WANTED status until you manually change its listing type or delete it.
+    </p>
+  </section>
+
+  <!-- ── Platform Reference ───────────────────────────────────────────── -->
+  <div class="hiw-section-label">Platform Reference</div>
+
+  <section class="hiw-section" id="deploy">
+    <h2>Deploy This Platform Yourself</h2>
+    <p>
+      This application is fully reproducible. If you're interested in running your own comic-selling
+      site powered by this same platform, reach out and I'll give you access to the repository along
+      with light support to get everything set up.
+    </p>
+    <p>
+      The only thing I ask is that you provide me with a domain name you've already purchased.
+      This just confirms you're a real person and not a bot — no domain, no access.   I recommend using
+        Namecheap, because I use their built-in Email account service, which is only about $1/month.
+    </p>
+    <p>
+      Once you have a domain ready, use the <a routerLink="/contact">Contact page</a> to send me a
+      message and I'll get back to you.
+    </p>
+  </section>
+
+</div>

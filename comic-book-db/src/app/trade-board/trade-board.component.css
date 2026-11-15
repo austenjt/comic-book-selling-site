@@ -1,0 +1,255 @@
+.trade-board-container {
+  padding: 0;
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.trade-intro {
+  color: var(--color-text-muted);
+  margin-bottom: 0.75rem;
+  line-height: 1.6;
+  max-width: 680px;
+}
+
+.trade-learn-more {
+  color: var(--color-primary);
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.trade-learn-more:hover {
+  text-decoration: underline;
+}
+
+.trade-loading,
+.trade-empty {
+  text-align: center;
+  color: #888;
+  padding: 3rem 1rem;
+}
+
+.error-message {
+  color: var(--color-danger);
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.trade-login-banner {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.9rem;
+  color: var(--color-text);
+}
+
+.trade-login-banner a {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* ── Card grid ──────────────────────────────────────────────────────────── */
+
+.wanted-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 0;
+  margin: 0;
+}
+
+.wanted-grid app-trade-card {
+  width: calc((100% - 80px) / 6);
+}
+
+@media screen and (max-width: 900px) {
+  .wanted-grid app-trade-card { width: calc((100% - 48px) / 4); }
+}
+
+@media screen and (max-width: 600px) {
+  .wanted-grid app-trade-card { width: calc(50% - 8px); }
+}
+
+@media screen and (max-width: 400px) {
+  .wanted-grid { gap: var(--space-3); }
+  .wanted-grid app-trade-card { width: 100%; }
+}
+
+/* ── Grade selector modal ───────────────────────────────────────────────── */
+
+.trade-grade-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.modal-title {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.modal-comic-name {
+  margin: 0;
+  font-weight: 600;
+  color: var(--color-text);
+  font-size: 0.95rem;
+}
+
+.modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.modal-label {
+  font-size: 0.88rem;
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+.modal-select {
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--color-border);
+  border-radius: 5px;
+  font-size: 0.9rem;
+  background: var(--color-surface);
+  cursor: pointer;
+}
+
+.modal-preview {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #c8d4a8;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 0.6rem 0.9rem;
+}
+
+.modal-preview-label {
+  font-size: 0.88rem;
+  color: var(--color-text);
+}
+
+.modal-preview-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-left: auto;
+}
+
+.modal-no-value {
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  border-radius: 5px;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.84rem;
+  color: var(--color-text-muted);
+}
+
+.modal-required-hint {
+  font-size: 0.8rem;
+  color: var(--color-danger);
+}
+
+.modal-grade-warning {
+  background: #fff3e0;
+  border: 1px solid #ffb74d;
+  border-radius: 5px;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.84rem;
+  color: #e65100;
+}
+
+.modal-error {
+  color: var(--color-danger);
+  font-size: 0.84rem;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.btn-modal-cancel {
+  padding: 0.45rem 1rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  color: var(--color-text-muted);
+}
+
+.btn-modal-cancel:hover:not(:disabled) {
+  background: #c8d4a8;
+}
+
+.btn-modal-confirm {
+  padding: 0.45rem 1.1rem;
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 600;
+  transition: background var(--duration-base) var(--ease-standard);
+}
+
+.btn-modal-confirm:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+
+.btn-modal-confirm:disabled,
+.btn-modal-cancel:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.trade-controls {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: var(--space-4);
+}
+
+.btn-expand-all {
+  background: rgba(240, 234, 210, 0.65);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-base) var(--ease-standard),
+    border-color     var(--duration-base) var(--ease-standard),
+    color            var(--duration-base) var(--ease-standard);
+}
+
+.btn-expand-all:hover {
+  background: var(--parchment);
+  border-color: var(--color-border-strong);
+  color: var(--color-text);
+}
+
+.btn-expand-all-active {
+  background: var(--sage);
+  color: var(--color-text);
+  border-color: var(--olive-dark);
+  box-shadow: inset 0 -2px 0 var(--olive-dark);
+}
+
+.btn-expand-all-active:hover {
+  background: var(--olive);
+  color: var(--color-text-inverse);
+}

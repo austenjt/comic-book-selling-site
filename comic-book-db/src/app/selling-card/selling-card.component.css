@@ -1,0 +1,566 @@
+:host {
+  display: block;
+  container-type: inline-size;   /* card height and details-view images size off the card width (cqw) */
+}
+
+a {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+  box-sizing: border-box;
+  background-color: var(--color-surface);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card-rest);
+  width: 100%;
+  /* Size the card to its cover: covers run ~1.45-1.53x as tall as wide, so
+     1.5x the card width fits the cover area, plus 44px for a two-line title
+     band and borders. Cards on one row share a width, so they share a height. */
+  height: calc(150cqw + 44px);
+  overflow: hidden;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+a:hover {
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-2px);
+  background-color: var(--color-surface);
+  text-decoration: none;
+}
+.expand-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 1;
+  cursor: pointer;
+}
+
+
+@media screen and (max-width: 400px) {
+  .image-container { min-height: 44px; }
+  .details { padding: 4px 6px; }
+.card-footer { padding: 2px 4px; min-height: 28px; }
+}
+
+/* Full-bleed cover: the image area takes whatever height the title band
+   leaves, and eBay/Set tags, price and Claimed/Sold sit on top of the cover. */
+.image-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  background-color: #c8d4a8;
+  padding: 0;
+  border-bottom: 1px solid var(--hairline);
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+  transition: flex-basis 0.3s ease;
+}
+
+.image-container img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  object-fit: contain;           /* show the whole cover; the sage well fills any slack */
+  border: none;
+}
+
+/* Narrow cards (six-up near the 900px breakpoint) are too short for the
+   details view, so let an expanded card grow just enough to fit it. */
+a.expanded {
+  height: max(calc(150cqw + 44px), 290px);
+}
+
+/* Details view: the image strip takes the height the details don't need
+   (the high grow factor wins nearly all of it), but never more than a whole
+   cover needs at this card width (a 2:3 cover is 1.5x as tall as it is wide).
+   Anything beyond that cap goes to the details instead. */
+a.expanded .image-container {
+  flex: 1000 1 auto;
+  min-height: 95px;
+  max-height: 150cqw;
+  align-items: center;
+  padding: 3px;
+}
+
+/* Show each image whole (scaled to the strip's height) instead of cropping it. */
+a.expanded .image-container img {
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+/* ── Overlays on the cover ─────────────────────────────────── */
+
+.cover-tags {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  display: flex;
+  gap: 4px;
+}
+
+.cover-price {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  height: 26px;
+  font-size: 1.1rem;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.45);
+}
+
+.cover-tags .ebay-badge,
+.cover-tags .badge-set {
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.35);
+}
+
+.cover-ribbon {
+  position: absolute;
+  top: 44%;
+  left: -12px;
+  right: -12px;
+  transform: rotate(-12deg);
+  padding: 3px 0;
+  text-align: center;
+  font-family: var(--font-comic);
+  font-size: 1.3rem;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.08em;
+  line-height: 1.1;
+  color: var(--color-text-inverse);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+}
+
+.cover-ribbon--claimed { background: var(--color-warning); }
+.cover-ribbon--sold    { background: var(--color-danger); }
+
+a.expanded .cover-ribbon {
+  top: 30%;
+  font-size: 1rem;
+}
+
+.details {
+  padding: 6px 10px;             /* small always-on padding for the visible title */
+  flex: none;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  overflow: hidden;
+  background-color: var(--color-surface);
+}
+
+.card-footer {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 6px;
+  min-height: 0;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  border-top: none;
+  background-color: var(--color-surface);
+  flex-shrink: 0;
+  transition: max-height 0.3s ease, opacity 0.25s ease, padding 0.2s ease;
+}
+
+a.expanded .card-footer {
+  padding: 4px 6px;
+  min-height: 32px;
+  max-height: 60px;
+  opacity: 1;
+  border-top: 1px solid var(--color-border);
+}
+
+.footer-spacer {
+  flex: 1;
+}
+
+.footer-actions button {
+  height: 22px;
+  padding: 0 5px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+/* ── Badges ────────────────────────────────────────────────── */
+
+.ebay-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  height: 22px;
+  padding: 0 4px;
+  background: var(--stone);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: var(--radius-badge);
+  line-height: 1;
+  cursor: default;
+  box-sizing: border-box;
+}
+
+.ebay-badge::after,
+.badge-set::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 0;
+  background: var(--color-bg);
+  color: #000;
+  border: 1px solid #000;
+  font-size: 0.72rem;
+  font-style: normal;
+  font-weight: 400;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+  padding: 3px 7px;
+  border-radius: 3px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.12s ease 0.25s;
+  z-index: 10;
+}
+
+.ebay-badge:hover::after,
+.badge-set:hover::after {
+  opacity: 1;
+}
+
+.badge-graded,
+.badge-set,
+.badge-key-issue {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 22px;
+  box-sizing: border-box;
+  font-size: 0.65rem;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0 4px;
+  border-radius: var(--radius-sm);
+  line-height: 1;
+  pointer-events: none;
+}
+
+.badge-graded {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+
+.badge-key-issue {
+  background: var(--color-warning);
+  color: var(--color-text-inverse);
+}
+
+.badge-set {
+  position: relative;
+  height: 22px;
+  box-sizing: border-box;
+  justify-content: center;
+  padding: 0 4px;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: normal;
+  line-height: 1;
+  pointer-events: auto;
+  cursor: default;
+  border-radius: var(--radius-badge);
+  background: var(--color-warm-accent-deep);
+  color: var(--color-text-inverse);
+}
+
+/* ── Back image: hidden until hover ─────────────────────────── */
+
+.image-container img.back-image {
+  display: none;
+}
+
+a.expanded .image-container img.back-image {
+  display: block;
+}
+
+/* Expanded two-images: front and back share the cover area side by side */
+a.expanded .image-container.two-images {
+  gap: 3px;
+  max-height: 75cqw;             /* two 2:3 covers side by side */
+}
+
+a.expanded .image-container.two-images img {
+  max-width: calc(50% - 1.5px);
+}
+
+/* ── Comic metadata ─────────────────────────────────────────── */
+
+.comic-title {
+  font-size: 0.8rem;
+  color: var(--color-text);
+  max-height: none;
+  opacity: 1;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;         /* clamp long titles to 2 lines */
+  -webkit-box-orient: vertical;
+  margin-bottom: 0;
+}
+
+a.expanded .details {
+  padding: 7px 10px;
+  flex: 1 0 auto;
+}
+
+.meta-grid {
+  display: flex;
+  flex-wrap: wrap;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  margin-bottom: 0;
+  transition: max-height 0.3s ease, opacity 0.25s ease, margin 0.2s ease;
+}
+
+a.expanded .meta-grid {
+  max-height: 200px;
+  opacity: 1;
+  margin-bottom: 2px;
+}
+
+.meta-grid > * {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.comic-number,
+.comic-series,
+.comic-volume,
+.comic-publisher,
+.comic-published,
+.comic-era,
+.comic-variant,
+.comic-publishdate,
+.comic-barcode,
+.comic-grade-certified,
+.comic-grade-est {
+  font-size: 0.65rem;
+  color: var(--color-text-muted);
+  margin-bottom: 2px;
+}
+
+.comic-key-issue {
+  font-size: 0.65rem;
+  color: var(--color-danger);
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.comic-estimate {
+  font-size: 0.72rem;
+  color: #7b8f4b;
+  font-weight: 600;
+}
+
+.price-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 8px;
+  background: var(--color-success);
+  color: var(--color-text-inverse);
+  border-radius: var(--radius-badge);
+  font-family: var(--font-comic);
+  font-size: 0.95rem;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.05em;
+  line-height: 1;
+  box-sizing: border-box;
+}
+
+/* ── Action buttons ─────────────────────────────────────────── */
+
+.btn-claim,
+.btn-in-cart,
+.btn-claimed,
+.btn-award,
+.btn-sell,
+.btn-copy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 22px;
+  padding: 0 5px;
+  border-radius: var(--radius-sm);
+  font-size: 0.66rem;
+  font-weight: var(--fw-bold);
+  line-height: 1;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition:
+    background-color var(--duration-base) var(--ease-standard),
+    border-color     var(--duration-base) var(--ease-standard),
+    color            var(--duration-base) var(--ease-standard),
+    box-shadow       var(--duration-base) var(--ease-standard);
+}
+
+.btn-claim {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  border-color: var(--color-primary);
+}
+.btn-claim:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+}
+.btn-claim:disabled {
+  background: #b8c89a;
+  border-color: #b8c89a;
+  cursor: not-allowed;
+}
+
+.btn-in-cart {
+  background: transparent;
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  cursor: default;
+}
+
+.btn-claimed {
+  background: #c8d4a8;
+  color: var(--color-text-muted);
+  border-color: #c8d4a8;
+  cursor: default;
+}
+
+.btn-award {
+  height: 22px;
+  box-sizing: border-box;
+  background: #8C6750;
+  color: var(--color-text-inverse);
+  border-color: #8C6750;
+}
+.btn-award:hover:not(:disabled) {
+  background: #6F523F;
+  border-color: #6F523F;
+}
+
+.btn-sell {
+  background: #2d6a4f;
+  color: var(--color-text-inverse);
+  border-color: #2d6a4f;
+}
+.btn-sell:hover:not(:disabled) {
+  background: #1b4332;
+  border-color: #1b4332;
+}
+
+.btn-copy {
+  height: 22px;
+  box-sizing: border-box;
+  margin-right: 4px;
+  background: #6b7280;
+  color: var(--color-text-inverse);
+  border-color: #6b7280;
+}
+.btn-copy:hover:not(:disabled) {
+  background: #4b5563;
+  border-color: #4b5563;
+}
+.btn-copy:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.btn-delete-card {
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+  background: transparent;
+  color: var(--color-danger);
+  border: 1px solid var(--color-danger);
+  transition:
+    background-color var(--duration-base) var(--ease-standard),
+    color            var(--duration-base) var(--ease-standard);
+}
+.btn-delete-card:hover { background: var(--color-danger-bg); }
+.btn-delete-card-confirm {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+  background: var(--color-danger-bg);
+}
+.btn-delete-card-confirm:hover { background: rgba(168, 85, 63, 0.22); }
+
+/* ── Status labels ─────────────────────────────────────────── */
+
+.comic-claimed-status {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  box-sizing: border-box;
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.card-sold {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.card-deleting {
+  opacity: 0.3;
+  pointer-events: none;
+  filter: grayscale(100%);
+}
+
+.sold-label {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  box-sizing: border-box;
+  font-size: var(--fs-14);
+  font-weight: var(--fw-bold);
+  color: var(--color-danger);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ── Phones (two-up and one-up grids) ──────────────────────────
+   Cards get wide here, so a fixed 340px card would crop the bottom of the
+   cover. Size the cover area to a comic's 2:3 shape instead and let the
+   card grow to fit, so the whole cover height is visible. */
+@media screen and (max-width: 600px) {
+  a,
+  a.expanded {
+    height: auto;
+  }
+
+  .image-container {
+    flex: none;
+    aspect-ratio: 2 / 3;
+  }
+
+  /* No spare card height on phones (the card sizes to its content), so give
+     the details-view strip a fixed shape: two 2:3 covers side by side. */
+  a.expanded .image-container {
+    flex: none;
+    aspect-ratio: 4 / 3;
+    max-height: none;
+  }
+}

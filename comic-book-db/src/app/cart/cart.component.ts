@@ -1,0 +1,430 @@
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { CartService } from '../cart.service';
+import { AuthService } from '../auth.service';
+import { Cart, CartDiscount, CartItem } from '../cart';
+
+interface CartRow {
+  type: 'single' | 'set';
+  collectionGroup: number | null;
+  items: CartItem[];
+  totalPrice: number;
+  claimedAt: string;
+  removeId: string;
+  /** True for single rows when the item is graded; for set rows, true if ANY member is graded. */
+  isGraded: boolean;
+  containerTitle?: string;
+  containerId?: string;
+  /** True when this row represents a trade-in credit item. */
+  isTrade?: boolean;
+}
+
+@Component({
+    selector: 'app-cart',
+    templateUrl: './cart.component.html',
+    styleUrls: ['./cart.component.css'],
+    standalone: false
+})
+export class CartComponent implements OnInit, OnDestroy {
+  cart: Cart | null = null;
+  loading = false;
+  error = '';
+  submitting = false;
+  customerNotes = '';
+  showPaymentModal = false;
+  showShippingModal = false;
+  paymentSuccess = false;
+  showVenmoModal = false;
+  confirmModal: {
+    comicId: string;
+    title: string;
+    bookCount: number;
+    isFinalizing: boolean;
+    /** True for a whole-set release; false for a single book removed from a submitted order. */
+    isSet: boolean;
+  } | null = null;
+  showUnsubmitWarning = false;
+
+  constructor(
+    private cartService: CartService,
+    public auth: AuthService
+  ) {}
+
+  ngOnInit() {
+    this.loadCart();
+  }
+
+  ngOnDestroy() {}
+
+  /** Extracts the backend's plain-text error body when present, falling back to a generic message. */
+  private extractErrorMessage(err: unknown, fallback: string): string {
+    const backendMessage = (err as { error?: unknown } | null)?.error;
+    return typeof backendMessage === 'string' && backendMessage ? backendMessage : fallback;
+  }
+
+  loadCart() {
+    this.loading = true;
+    this.error = '';
+    this.cartService.getMyCart().subscribe({
+      next: cart => { this.cart = cart; this.loading = false; },
+      error: (err) => {
+        this.error = this.extractErrorMessage(err, 'Failed to load cart.');
+        this.loading = false;
+      }
+    });
+  }
+
+  removeItem(comicId: string) {
+    const item = this.cart?.items.find(i => i.comicId === comicId);
+    const isSetItem = item?.collectionGroup != null && item.collectionGroup > 0;
+
+    if (isSetItem) {
+      const setCount = this.cart?.items.filter(i => i.collectionGroup === item!.collectionGroup && !i.isSetContainer).length ?? 0;
+      // Find the container title for the modal heading
+      const container = this.cart?.items.find(i => i.isSetContainer && i.collectionGroup === item!.collectionGroup);
+      this.confirmModal = {
+        comicId,
+        title: container?.comicTitle ?? item?.comicTitle ?? 'this set',
+        bookCount: setCount,
+        isFinalizing: this.cart?.status === 'SUBMITTED',
+        isSet: true
+      };
+      return;
+    }
+
+    if (this.cart?.status === 'SUBMITTED') {
+      this.confirmModal = {
+        comicId,
+        title: item?.comicTitle ?? 'this book',
+        bookCount: 1,
+        isFinalizing: true,
+        isSet: false
+      };
+      return;
+    }
+
+    this.executeRelease(comicId, item, false, 0);
+  }
+
+  confirmRelease() {
+    if (!this.confirmModal) return;
+    const { comicId, isSet, bookCount } = this.confirmModal;
+    const item = this.cart?.items.find(i => i.comicId === comicId);
+    this.confirmModal = null;
+    this.executeRelease(comicId, item, isSet, bookCount);
+  }
+
+  cancelRelease() {
+    this.confirmModal = null;
+  }
+
+  private executeRelease(comicId: string, item: CartItem | undefined, isSetItem: boolean, setCount: number) {
+    this.error = '';
+    this.cartService.removeItem(comicId).subscribe({
+      next: cart => {
+        this.cart = cart;
+      },
+      error: (err) => this.error = this.extractErrorMessage(err, 'Failed to remove item.')
+    });
+  }
+
+  submitOrder() {
+    this.submitting = true;
+    this.error = '';
+    this.cartService.submitOrder(this.customerNotes || undefined).subscribe({
+      next: cart => { this.cart = cart; this.submitting = false; },
+      error: (err) => {
+        this.error = this.extractErrorMessage(err, 'Failed to submit order.');
+        this.submitting = false;
+      }
+    });
+  }
+
+  get visibleItems() {
+    return this.cart?.items.filter(i => !i.isSetContainer) ?? [];
+  }
+
+  trackByRow(_index: number, row: { collectionGroup: number | null; removeId?: string; items: { comicId?: string }[] }): string {
+    return row.removeId ?? (row.items[0] as any)?.comicId ?? String(row.collectionGroup ?? _index);
+  }
+  trackByComicId(_index: number, item: { comicId?: string }): string { return item.comicId ?? String(_index); }
+
+  get groupedRows(): CartRow[] {
+    const all = this.cart?.items ?? [];
+    const nonContainers = all.filter(i => !i.isSetContainer);
+    const containers = all.filter(i => i.isSetContainer);
+    const rows: CartRow[] = [];
+    const seenGroups = new Set<number>();
+
+    for (const item of nonContainers) {
+      if (item.collectionGroup && item.collectionGroup > 0) {
+        if (seenGroups.has(item.collectionGroup)) continue;
+        seenGroups.add(item.collectionGroup);
+        const setItems = nonContainers.filter(i => i.collectionGroup === item.collectionGroup);
+        const container = containers.find(c => c.collectionGroup === item.collectionGroup);
+        rows.push({
+          type: 'set',
+          collectionGroup: item.collectionGroup,
+          items: setItems,
+          totalPrice: setItems.reduce((sum, i) => sum + i.price, 0),
+          claimedAt: setItems[0].claimedAt,
+          removeId: setItems[0].comicId,
+          isGraded: setItems.some(i => !!i.isGraded),
+          containerTitle: container?.comicTitle,
+          containerId: container?.comicId
+        });
+      } else {
+        rows.push({
+          type: 'single',
+          collectionGroup: null,
+          items: [item],
+          totalPrice: item.price,
+          claimedAt: item.claimedAt,
+          removeId: item.comicId,
+          isGraded: !!item.isGraded,
+          isTrade: !!item.isTrade
+        });
+      }
+    }
+    return rows;
+  }
+
+  get hasTradeItem(): boolean {
+    return this.cart?.items.some(i => i.isTrade) ?? false;
+  }
+
+  /** Net item total (includes negative trade credits, before discount). */
+  get netItemsTotal(): number {
+    return this.visibleItems.reduce((sum, i) => sum + i.price, 0);
+  }
+
+  get cartTotal(): number {
+    return this.visibleItems.reduce((sum, item) => sum + item.price, 0);
+  }
+
+  get shippingAmount(): number {
+    // After submit, use persisted shippingCost; before submit, use live estimate
+    if (this.cart?.shippingCost && this.cart.shippingCost > 0) return this.cart.shippingCost;
+    return this.cart?.shippingEstimate?.estimatedCost ?? 0;
+  }
+
+  get discountedTotal(): number {
+    return Math.max(0, this.cartTotal - (this.cart?.discountAmount ?? 0)) + this.shippingAmount;
+  }
+
+  discountedSetTotal(row: CartRow): number {
+    return row.items.reduce((sum, item) => sum + this.discountedItemPrice(item), 0);
+  }
+
+  get showItemDiscounts(): boolean {
+    return this.cart?.status !== 'OPEN' && (this.cart?.discountAmount ?? 0) > 0;
+  }
+
+  /** Apply rule-level exclusions to a cart item. Mirrors backend DiscountService logic. */
+  private isItemExcluded(item: CartItem, rule: CartDiscount): boolean {
+    if (rule.excludesSets && item.collectionGroup != null && item.collectionGroup > 0) return true;
+    if (rule.excludesGraded && item.isGraded) return true;
+    return false;
+  }
+
+  /**
+   * Returns the eligible base price total for a given discount rule — i.e. the sum of prices
+   * for all items that this rule applies to (after honoring its exclude flags).
+   */
+  private eligibleBaseForRule(rule: CartDiscount): number {
+    return this.visibleItems
+      .filter(i => !this.isItemExcluded(i, rule))
+      .reduce((sum, i) => sum + i.price, 0);
+  }
+
+  /** True when the rule is a "Buy X get 1 free" type (description begins with "Buy "). */
+  private isBuyXFreeRule(rule: CartDiscount): boolean {
+    return rule.description.startsWith('Buy ');
+  }
+
+  /**
+   * Computes the free-item set for every BUY_X_GET_ONE_FREE rule in the cart's breakdown
+   * with cross-rule dedupe — mirrors {@code DiscountService.computeBuyXFreePicks} on the
+   * backend so the per-row FREE badges line up with the backend's authoritative discount
+   * amounts. Without dedupe, two rules whose backend-computed amounts both consume the
+   * same $0.50 book would show only one FREE badge instead of two distinct ones.
+   *
+   * <p>Rules are processed in the breakdown's order; the backend produces the breakdown in
+   * xBooks-ascending order so smaller-X rules already claim the cheapest items first, and
+   * each later rule's {@code amount} reflects the leftover cheapest sum. We greedily
+   * consume {@code rule.amount} from the cheapest items not yet freed.</p>
+   */
+  private computeBuyXFreeIds(): Map<string, Set<string>> {
+    const result = new Map<string, Set<string>>();
+    const breakdown = this.cart?.discountBreakdown;
+    if (!breakdown || breakdown.length === 0) return result;
+
+    const alreadyFreed = new Set<string>();
+    for (const rule of breakdown) {
+      if (!this.isBuyXFreeRule(rule)) continue;
+
+      const eligible = this.visibleItems
+        .filter(i => i.price > 0
+          && !this.isItemExcluded(i, rule)
+          && !alreadyFreed.has(i.comicId))
+        .slice()
+        .sort((a, b) => a.price - b.price);
+
+      const freeIds = new Set<string>();
+      let remaining = Math.round(rule.amount * 100) / 100;
+      for (const item of eligible) {
+        if (remaining < 0.005) break;
+        if (item.price <= remaining + 0.005) {
+          freeIds.add(item.comicId);
+          alreadyFreed.add(item.comicId);
+          remaining = Math.round((remaining - item.price) * 100) / 100;
+        }
+      }
+      result.set(rule.description, freeIds);
+    }
+    return result;
+  }
+
+  /**
+   * Exact discounted price for one item.
+   *
+   * When discountBreakdown is present (orders submitted after this feature shipped), each rule's
+   * savings are distributed based on the rule type:
+   *   - BUY_X_GET_ONE_FREE: the cheapest eligible item(s) are fully free ($0.00); all others
+   *     absorb nothing from this rule.
+   *   - All other rules: savings are distributed proportionally among eligible items, so
+   *     set members skip set-excluded rules.
+   *
+   * Falls back to a simple proportional spread for older orders that were submitted before
+   * the breakdown field existed.
+   */
+  discountedItemPrice(item: CartItem): number {
+    const breakdown = this.cart?.discountBreakdown;
+    if (breakdown && breakdown.length > 0) {
+      const buyXFreeMap = this.computeBuyXFreeIds();
+      let totalItemDiscount = 0;
+      for (const rule of breakdown) {
+        if (this.isItemExcluded(item, rule)) continue;
+        if (this.isBuyXFreeRule(rule)) {
+          // Free items absorb their full price from this rule; all others absorb nothing.
+          if (buyXFreeMap.get(rule.description)?.has(item.comicId)) {
+            totalItemDiscount += item.price;
+          }
+          continue;
+        }
+        const base = this.eligibleBaseForRule(rule);
+        if (base <= 0) continue;
+        totalItemDiscount += (item.price / base) * rule.amount;
+      }
+      return Math.max(0, Math.round((item.price - totalItemDiscount) * 100) / 100);
+    }
+
+    // Fallback for orders without breakdown: spread total discount proportionally.
+    const discount = this.cart?.discountAmount ?? 0;
+    const base = this.visibleItems.reduce((sum, i) => sum + i.price, 0);
+    if (discount <= 0 || base <= 0) return item.price;
+    const factor = (base - discount) / base;
+    if (factor <= 0) return 0;
+    return Math.round(item.price * factor * 100) / 100;
+  }
+
+  get statusLabel(): string {
+    switch (this.cart?.status) {
+      case 'OPEN': return 'Open — add or remove items freely.';
+      case 'SUBMITTED': return 'Submitted — your order is with the seller.';
+      case 'FULFILLED': return 'Fulfilled — your order has been shipped!';
+      default: return '';
+    }
+  }
+
+  /**
+   * Active stepper index, used only to distinguish Building (0) from Submitted (1+) in the
+   * template. The Trade Received and Paid stepper rows read cart.tradeReceived / isPaid
+   * directly instead of this index, since payment can happen before the trade-in is marked
+   * received and those two milestones don't always land in a fixed order.
+   */
+  get displayStep(): number {
+    if (!this.cart || this.cart.status === 'OPEN') return 0;
+    if (this.cart.status === 'SUBMITTED') {
+      if (this.hasTradeItem && !this.cart.tradeReceived) return 1;
+      if (this.hasTradeItem && this.cart.tradeReceived && this.cart.paymentStatus !== 'PAID') return 2;
+      if (this.cart.paymentStatus === 'PAID') return this.hasTradeItem ? 3 : 2;
+      return 1;
+    }
+    return 99;
+  }
+
+  canRemove(): boolean {
+    return this.cart?.status === 'OPEN' || this.cart?.status === 'SUBMITTED';
+  }
+
+  canRemoveItem(comicId: string): boolean {
+    return this.canRemove();
+  }
+
+  canSubmit(): boolean {
+    if (this.cart?.status !== 'OPEN') return false;
+    if (this.visibleItems.length === 0) return false;
+    if (this.hasTradeItem && this.netItemsTotal < 0) return false;
+    return true;
+  }
+
+  get balanceNegative(): boolean {
+    return this.hasTradeItem && this.netItemsTotal < 0;
+  }
+
+  canUnsubmit(): boolean {
+    return this.cart?.status === 'SUBMITTED';
+  }
+
+  get isPaid(): boolean {
+    return this.paymentSuccess || this.cart?.paymentStatus === 'PAID';
+  }
+
+  get venmoNotified(): boolean {
+    return this.cart?.paymentMethod === 'VENMO';
+  }
+
+  onPaymentComplete() {
+    this.showPaymentModal = false;
+    this.paymentSuccess = true;
+    this.loadCart();
+  }
+
+  onShippingAddressSaved(updatedCart: Cart) {
+    this.cart = updatedCart;
+  }
+
+  onVenmoSent(updatedCart: Cart) {
+    this.showVenmoModal = false;
+    this.cart = updatedCart;
+  }
+
+  unsubmit() {
+    // Trade orders where the trade-in hasn't been marked received yet are the ones where the
+    // physical comic may already be in the mail — warn before reverting the order to Building,
+    // since the order state would no longer match what's actually in transit.
+    if (this.hasTradeItem && !this.cart?.tradeReceived) {
+      this.showUnsubmitWarning = true;
+      return;
+    }
+    this.executeUnsubmit();
+  }
+
+  confirmUnsubmit() {
+    this.showUnsubmitWarning = false;
+    this.executeUnsubmit();
+  }
+
+  cancelUnsubmit() {
+    this.showUnsubmitWarning = false;
+  }
+
+  private executeUnsubmit() {
+    this.error = '';
+    this.cartService.unsubmitMyOrder().subscribe({
+      next: cart => { this.cart = cart; },
+      error: (err) => this.error = this.extractErrorMessage(err, 'Failed to unsubmit order.')
+    });
+  }
+
+}

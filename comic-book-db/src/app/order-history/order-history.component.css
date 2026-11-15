@@ -1,0 +1,162 @@
+.orders-container { padding: 24px; max-width: 900px; margin: 0 auto; }
+
+.history-divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 2rem 0 1.5rem;
+}
+
+.history-divider::before,
+.history-divider::after {
+  content: '';
+  flex: 1;
+  border-top: 1px solid #ddd;
+}
+
+.history-divider-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #888;
+  white-space: nowrap;
+}
+
+/* Order line "Set" identity tag — solid warm-accent. */
+.set-tag {
+  display: inline-flex;
+  align-items: center;
+  margin-left: var(--space-2);
+  padding: 1px var(--space-2);
+  background: var(--color-warm-accent-deep);
+  color: var(--color-text-inverse);
+  font-size: 0.65rem;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  border-radius: 3px;
+  vertical-align: middle;
+  line-height: 1.4;
+}
+
+.empty-state { color: var(--color-text-muted); margin-top: 16px; }
+
+/* .order-card, .order-header, .order-meta, .order-date are shared
+   utilities in styles.css (Order-card patterns block). */
+
+.order-status {
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: rgba(173,193,120,0.25);
+  color: #dde5b6;
+}
+
+.order-total { font-size: 1.05rem; font-weight: 700; color: var(--color-text); }
+
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 10px 16px; border-bottom: 1px solid var(--color-border); text-align: left; color: var(--color-text); }
+th { font-weight: bold; background: #adc178; }
+tfoot td { font-weight: bold; background: #adc178; }
+
+a { color: var(--color-accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.error-message { color: var(--color-danger); margin-bottom: var(--space-3); }
+
+.item-count-label { font-size: 0.8rem; font-weight: 400; color: var(--color-text-muted); }
+
+.price-original { text-decoration: line-through; color: var(--color-text-muted); margin-right: 6px; }
+.price-discounted { color: #7b8f4b; font-weight: 600; }
+
+.price-free-badge {
+  display: inline-block;
+  background: #7b8f4b;
+  color: #f0ead2;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 1px 6px;
+  border-radius: 3px;
+  vertical-align: middle;
+}
+
+.set-header-row td {
+  background: rgba(169, 132, 103, 0.07);
+  font-weight: 600;
+}
+
+.set-total-price {
+  font-weight: 400;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+.set-header-link {
+  color: var(--color-text);
+}
+
+.set-member-row td {
+  background: rgba(169, 132, 103, 0.03);
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.set-member-comic {
+  padding-left: 24px;
+  font-size: 0.875rem;
+}
+
+.set-member-price {
+  font-size: 0.875rem;
+}
+
+.discount-savings { color: #7b8f4b; font-weight: 500; }
+.discount-desc { font-size: 0.85em; color: var(--color-text-muted); margin-left: 0.4rem; }
+
+.shipping-cost { color: var(--color-text); font-weight: 500; }
+
+.order-info {
+  padding: 10px 16px;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.88rem;
+}
+
+.info-label {
+  font-weight: 600;
+  color: var(--color-text-muted);
+  margin-right: 6px;
+}
+
+.info-value {
+  display: inline;
+  margin: 0;
+  color: var(--color-text-muted);
+  white-space: pre-wrap;
+}
+
+.tracking-panel {
+  background: rgba(173,193,120,0.06);
+}
+
+.seller-notes-panel {
+  background: rgba(173,193,120,0.06);
+  border-left: 3px solid #adc178;
+}
+.seller-notes-panel .info-value {
+  display: block;
+  margin-top: 4px;
+}
+
+.customer-notes-panel {
+  background: rgba(59,130,246,0.05);
+  border-left: 3px solid #3b82f6;
+}
+.customer-notes-panel .info-value {
+  display: block;
+  margin-top: 4px;
+}

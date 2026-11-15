@@ -1,0 +1,57 @@
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
+import { Title, Meta } from '@angular/platform-browser';
+import { ConfigService } from '../config.service';
+import { environment } from '../../environments/environment';
+
+@Component({
+    selector: 'app-contact',
+    templateUrl: './contact.component.html',
+    styleUrls: ['./contact.component.css'],
+    standalone: true,
+    imports: [CommonModule, FormsModule],
+})
+export class ContactComponent implements OnInit {
+  private readonly apiBase = environment.apiBase;
+
+  name = '';
+  email = '';
+  message = '';
+
+  sending = false;
+  sent = false;
+  sendError = '';
+
+  constructor(private http: HttpClient, private configService: ConfigService, private title: Title, private meta: Meta) {}
+
+  ngOnInit(): void {
+    this.title.setTitle('Contact — Lightning Comics Rocks!');
+    this.meta.updateTag({ name: 'description', content: 'Get in touch with Lightning Comics Rocks — a comic book collector and seller based in Anytown, ST.' });
+  }
+
+  get emailEnabled(): boolean {
+    return this.configService.emailEnabled;
+  }
+
+  submit() {
+    this.sending = true;
+    this.sent = false;
+    this.sendError = '';
+    this.http.post(`${this.apiBase}/contact`, { name: this.name, email: this.email, message: this.message }, { responseType: 'text' })
+      .subscribe({
+        next: () => {
+          this.sending = false;
+          this.sent = true;
+          this.name = '';
+          this.email = '';
+          this.message = '';
+        },
+        error: () => {
+          this.sending = false;
+          this.sendError = 'Something went wrong. Please try again.';
+        }
+      });
+  }
+}

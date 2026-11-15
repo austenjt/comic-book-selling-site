@@ -1,0 +1,37 @@
+<div class="modal-overlay" (click)="close()" role="dialog" aria-modal="true" aria-labelledby="venmo-modal-title">
+  <div class="modal modal--sm venmo-modal" (click)="$event.stopPropagation()">
+
+    <div class="modal__header">
+      <h3 id="venmo-modal-title" class="modal__title">Pay with Venmo</h3>
+      <button class="modal__close" (click)="close()" aria-label="Close">&#x2715;</button>
+    </div>
+
+    <div class="modal__body venmo-modal__body">
+      <p class="venmo-amount">Total due: <strong>{{ amountDollars | currency }}</strong></p>
+
+      <div class="venmo-instructions">
+        <p>Send payment to <strong>@{{ venmoHandle }}</strong> on Venmo.</p>
+        <p class="venmo-note-hint">
+          Include <strong>{{ invoiceNumber }}</strong> in the note so we can match your payment.
+        </p>
+      </div>
+
+      <a class="btn-venmo-deep-link" [href]="venmoDeepLink">
+        Open Venmo App
+      </a>
+      <p class="venmo-web-fallback">
+        On desktop? <a [href]="venmoWebLink" target="_blank" rel="noopener">Open Venmo.com</a>
+      </p>
+
+      <div *ngIf="error" class="venmo-error">{{ error }}</div>
+    </div>
+
+    <div class="modal__actions venmo-modal__actions">
+      <button class="btn-cancel-venmo" (click)="close()" [disabled]="sending">Cancel</button>
+      <button class="btn-sent-venmo" (click)="onSent()" [disabled]="sending">
+        {{ sending ? 'Saving…' : "I've Sent the Payment" }}
+      </button>
+    </div>
+
+  </div>
+</div>

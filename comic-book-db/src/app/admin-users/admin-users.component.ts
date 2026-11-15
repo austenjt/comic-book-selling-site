@@ -1,0 +1,100 @@
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { UserService } from '../user.service';
+import { User } from '../user';
+import { CartService } from '../cart.service';
+import { ComicService } from '../comic.service';
+
+@Component({
+    selector: 'app-admin-users',
+    templateUrl: './admin-users.component.html',
+    styleUrls: ['./admin-users.component.css'],
+    standalone: true,
+    imports: [CommonModule, FormsModule],
+})
+export class AdminUsersComponent implements OnInit {
+  existingUsers: User[] = [];
+  loading = false;
+  error = '';
+
+  resetConfirmText = '';
+  resetInProgress = false;
+  resetSuccess = '';
+  resetError = '';
+
+  resetCountsInProgress = false;
+  resetCountsSuccess = '';
+  resetCountsError = '';
+
+  constructor(
+    private userService: UserService,
+    private cartService: CartService,
+    private comicService: ComicService,
+  ) {}
+
+  trackById(_index: number, user: User): string { return user.id; }
+
+  ngOnInit() {
+    this.loadAll();
+  }
+
+  loadAll() {
+    this.loading = true;
+    this.userService.getApprovedUsers().subscribe({
+      next: users => { this.existingUsers = users; this.loading = false; },
+      error: () => { this.error = 'Failed to load users.'; this.loading = false; }
+    });
+  }
+
+  suspend(user: User) {
+    this.userService.suspendUser(user.id).subscribe({
+      next: () => this.userService.getApprovedUsers().subscribe({
+        next: users => { this.existingUsers = users; }
+      }),
+      error: () => { this.error = 'Failed to suspend user.'; }
+    });
+  }
+
+  reactivate(user: User) {
+    this.userService.reactivateUser(user.id).subscribe({
+      next: () => this.userService.getApprovedUsers().subscribe({
+        next: users => { this.existingUsers = users; }
+      }),
+      error: () => { this.error = 'Failed to reactivate user.'; }
+    });
+  }
+
+  resetViewCounts() {
+    this.resetCountsInProgress = true;
+    this.resetCountsSuccess = '';
+    this.resetCountsError = '';
+    this.comicService.resetViewCounts().subscribe({
+      next: (res) => {
+        this.resetCountsSuccess = `Reset complete. ${res.reset} comic${res.reset !== 1 ? 's' : ''} updated.`;
+        this.resetCountsInProgress = false;
+      },
+      error: () => {
+        this.resetCountsError = 'Reset failed. Check the server logs.';
+        this.resetCountsInProgress = false;
+      }
+    });
+  }
+
+  resetDatabase() {
+    this.resetInProgress = true;
+    this.resetSuccess = '';
+    this.resetError = '';
+    this.cartService.resetDatabase().subscribe({
+      next: () => {
+        this.resetSuccess = 'Database reset complete. All comics, images, carts, discounts, and sessions have been cleared.';
+        this.resetConfirmText = '';
+        this.resetInProgress = false;
+      },
+      error: () => {
+        this.resetError = 'Reset failed. Check the server logs.';
+        this.resetInProgress = false;
+      }
+    });
+  }
+}

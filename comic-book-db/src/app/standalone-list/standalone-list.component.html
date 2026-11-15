@@ -1,0 +1,378 @@
+
+<!-- ── Quick Add Wizard ─────────────────────────────────────────────────── -->
+<div class="qa-section">
+  <div class="qa-header">
+    <span class="qa-title">Quick Add</span>
+    <span class="qa-step-indicator">Step {{ qaStep }} of 3</span>
+  </div>
+
+  <div *ngIf="qaSuccess" role="status" aria-live="polite" class="qa-success">{{ qaSuccess }}</div>
+  <div *ngIf="qaError" id="qa-error" role="alert" class="qa-error">{{ qaError }}</div>
+
+  <!-- Step 1 — Identity -->
+  <div *ngIf="qaStep === 1" class="qa-fields">
+    <div class="qa-field" [class.qa-field-error]="qaShowFieldErrors && !qa.title.trim()">
+      <label for="qa-title">Title</label>
+      <input type="text" id="qa-title" [(ngModel)]="qa.title" (blur)="qaDefaultSeries()" placeholder="e.g. Amazing Spider-Man"
+             [attr.aria-invalid]="qaShowFieldErrors && !qa.title.trim() ? 'true' : null"
+             [attr.aria-describedby]="qaShowFieldErrors && !qa.title.trim() ? 'qa-title-error' : (qaError ? 'qa-error' : null)" />
+      <span *ngIf="qaShowFieldErrors && !qa.title.trim()" id="qa-title-error" class="field-error">Title is required.</span>
+    </div>
+    <div class="qa-field">
+      <label>Series</label>
+      <input type="text" [(ngModel)]="qa.series" list="qa-series-list" placeholder="defaults to Title" />
+      <datalist id="qa-series-list">
+        <option *ngFor="let s of qaSeries" [value]="s"></option>
+      </datalist>
+    </div>
+    <div class="qa-field" [class.qa-field-error]="qaShowFieldErrors && !qa.number.trim()">
+      <label for="qa-number">Number</label>
+      <input type="text" id="qa-number" [(ngModel)]="qa.number" placeholder="e.g. 1, 121, NN"
+             [attr.aria-invalid]="qaShowFieldErrors && !qa.number.trim() ? 'true' : null"
+             [attr.aria-describedby]="qaShowFieldErrors && !qa.number.trim() ? 'qa-number-error' : (qaError ? 'qa-error' : null)" />
+      <span *ngIf="qaShowFieldErrors && !qa.number.trim()" id="qa-number-error" class="field-error">Number is required.</span>
+    </div>
+    <div class="qa-field">
+      <label>Publisher</label>
+      <input type="text" [(ngModel)]="qa.publisher" placeholder="e.g. Marvel" />
+    </div>
+    <div class="qa-field">
+      <label>Era</label>
+      <select [(ngModel)]="qa.era">
+        <option value="">— select —</option>
+        <option *ngFor="let e of ERA_OPTIONS" [value]="e">{{ e }}</option>
+      </select>
+    </div>
+    <div class="qa-field">
+      <label>Published Date</label>
+      <input type="text" [(ngModel)]="qa.publishedDate" placeholder="yyyy-MM-dd" />
+    </div>
+    <div class="qa-field">
+      <label>Variant</label>
+      <select [(ngModel)]="qa.variant">
+        <option value="">— select —</option>
+        <option *ngFor="let v of enums.coverVariants" [value]="v">{{ v }}</option>
+      </select>
+    </div>
+    <div class="qa-field">
+      <label>Bar Code</label>
+      <input type="text" [(ngModel)]="qa.barCode" placeholder="e.g. 75960608628600111" />
+    </div>
+    <div class="qa-field">
+      <label>Print Run</label>
+      <input type="number" [(ngModel)]="qa.printRun" min="1" placeholder="optional" />
+    </div>
+    <div class="qa-field">
+      <label>Key Issue</label>
+      <input type="text" [(ngModel)]="qa.keyIssue" placeholder="e.g. 1st app. Wolverine" />
+    </div>
+    <div class="qa-field">
+      <label>Writer(s)</label>
+      <input type="text" [(ngModel)]="qa.writer" placeholder="comma-separated" />
+    </div>
+    <div class="qa-field">
+      <label>Artist(s)</label>
+      <input type="text" [(ngModel)]="qa.artist" placeholder="comma-separated" />
+    </div>
+  </div>
+
+  <!-- Step 2 — Pricing / Acquisition / Notes -->
+  <div *ngIf="qaStep === 2" class="qa-fields">
+    <div class="qa-field" [class.qa-field-error]="qaShowFieldErrors && qa.isForSale && (qa.salePrice === null || qa.salePrice === undefined)">
+      <label for="qa-sale-price">Sale Price ($)</label>
+      <input type="number" id="qa-sale-price" [(ngModel)]="qa.salePrice" min="0" step="0.25" placeholder="leave blank if not priced"
+             [attr.aria-invalid]="qaShowFieldErrors && qa.isForSale && (qa.salePrice === null || qa.salePrice === undefined) ? 'true' : null"
+             [attr.aria-describedby]="qaShowFieldErrors && qa.isForSale && (qa.salePrice === null || qa.salePrice === undefined) ? 'qa-sale-price-error' : (qaError ? 'qa-error' : null)" />
+      <span *ngIf="qaShowFieldErrors && qa.isForSale && (qa.salePrice === null || qa.salePrice === undefined)" id="qa-sale-price-error" class="field-error">Sale Price is required when For Sale is checked.</span>
+    </div>
+    <div class="qa-field">
+      <label>Target Price ($)</label>
+      <input type="number" [(ngModel)]="qa.targetPrice" min="0" step="0.25" placeholder="internal reference" />
+    </div>
+    <div class="qa-field">
+      <label>Personal Estimate ($)</label>
+      <input type="number" [(ngModel)]="qa.personalEstimate" min="0" step="0.25" placeholder="optional" />
+    </div>
+    <div class="qa-field">
+      <label>Price Paid ($)</label>
+      <input type="number" [(ngModel)]="qa.pricePaid" min="0" step="0.25" placeholder="optional" />
+    </div>
+    <div class="qa-field">
+      <label>Date Acquired</label>
+      <input type="text" [(ngModel)]="qa.dateAcquired" placeholder="yyyy-MM-dd" pattern="\d{4}-\d{2}-\d{2}" />
+    </div>
+    <div class="qa-field">
+      <label>Purchased From</label>
+      <input type="text" [(ngModel)]="qa.purchasedFrom" placeholder="e.g. eBay, comics show" />
+    </div>
+    <div class="qa-field">
+      <label>Purchase Reference URL</label>
+      <input type="text" [(ngModel)]="qa.purchaseReferenceURL" placeholder="e.g. eBay listing URL" />
+    </div>
+    <div class="qa-field">
+      <label>Storage Location</label>
+      <input type="text" [(ngModel)]="qa.storageLocation" placeholder="e.g. Box 3, Shelf A" />
+    </div>
+    <div class="qa-field">
+      <label>Defects</label>
+      <input type="text" [(ngModel)]="qa.defects" placeholder="e.g. spine stress, tape" />
+    </div>
+    <div class="qa-field">
+      <label>Public Notes</label>
+      <input type="text" [(ngModel)]="qa.publicNotes" placeholder="visible to buyers" />
+    </div>
+    <div class="qa-field">
+      <label>Add to Set</label>
+      <select [(ngModel)]="qa.collectionGroup">
+        <option [ngValue]="null">— None (standalone) —</option>
+        <option *ngFor="let s of qaSets; trackBy: trackBySetId" [ngValue]="s.collectionGroup">{{ s.title }}</option>
+      </select>
+    </div>
+    <div class="qa-field qa-field-checkbox">
+      <label>For Sale</label>
+      <input type="checkbox" [(ngModel)]="qa.isForSale" />
+    </div>
+  </div>
+
+  <!-- Step 3 — Grading -->
+  <div *ngIf="qaStep === 3" class="qa-fields">
+    <div class="qa-field" [class.qa-field-error]="qaShowFieldErrors && !qa.gradingCompany">
+      <label for="qa-grading-company">Grading Company</label>
+      <select id="qa-grading-company" [(ngModel)]="qa.gradingCompany"
+              [attr.aria-invalid]="qaShowFieldErrors && !qa.gradingCompany ? 'true' : null"
+              [attr.aria-describedby]="qaShowFieldErrors && !qa.gradingCompany ? 'qa-gc-error' : (qaError ? 'qa-error' : null)">
+        <option value="">— select —</option>
+        <option *ngFor="let gc of enums.gradingCompanies" [value]="gc">{{ gc }}</option>
+      </select>
+      <span *ngIf="qaShowFieldErrors && !qa.gradingCompany" id="qa-gc-error" class="field-error">Select a grading company.</span>
+    </div>
+    <div class="qa-field" [class.qa-field-error]="qaShowFieldErrors && (qa.grade === null || qa.grade === undefined)">
+      <label for="qa-grade">Grade</label>
+      <select id="qa-grade" [(ngModel)]="qa.grade"
+              [attr.aria-invalid]="qaShowFieldErrors && (qa.grade === null || qa.grade === undefined) ? 'true' : null"
+              [attr.aria-describedby]="qaShowFieldErrors && (qa.grade === null || qa.grade === undefined) ? 'qa-grade-error' : (qaError ? 'qa-error' : null)">
+        <option [ngValue]="null">— select —</option>
+        <option *ngFor="let g of enums.grades" [ngValue]="g.value">{{ g.value | number:'1.1-1' }} — {{ g.label }}</option>
+      </select>
+      <span *ngIf="qaShowFieldErrors && (qa.grade === null || qa.grade === undefined)" id="qa-grade-error" class="field-error">Select a grade.</span>
+    </div>
+    <div class="qa-field">
+      <label>Certification ID</label>
+      <input type="text" [(ngModel)]="qa.certificationId" placeholder="e.g. 1234567890" />
+    </div>
+    <div class="qa-field">
+      <label>Page Quality</label>
+      <select [(ngModel)]="qa.pageQuality">
+        <option value="">— select —</option>
+        <option *ngFor="let pq of enums.pageQualities" [value]="pq">{{ pq }}</option>
+      </select>
+    </div>
+    <div class="qa-field qa-field-checkbox">
+      <label>Pedigree</label>
+      <input type="checkbox" [(ngModel)]="qa.pedigree" />
+    </div>
+    <div class="qa-field qa-field-checkbox">
+      <label>Signed</label>
+      <input type="checkbox" [(ngModel)]="qa.signed" />
+    </div>
+  </div>
+
+  <div class="qa-actions">
+    <button *ngIf="qaStep > 1" class="qa-btn qa-btn-back" (click)="qaBack()">&#8592; Back</button>
+    <button class="qa-btn qa-btn-reset" (click)="qaReset()">Clear</button>
+    <button *ngIf="qaStep === 1" class="qa-btn qa-btn-next" (click)="qaNext()">Next &#8594;</button>
+    <button *ngIf="qaStep === 2" class="qa-btn qa-btn-save" (click)="qaSave()" [disabled]="qaSaving">
+      {{ qaSaving ? 'Saving…' : 'Save' }}
+    </button>
+    <button *ngIf="qaStep === 2" class="qa-btn qa-btn-graded" (click)="qaToGraded()">Graded &#8594;</button>
+    <button *ngIf="qaStep === 3" class="qa-btn qa-btn-save" (click)="qaSave()" [disabled]="qaSaving">
+      {{ qaSaving ? 'Saving…' : 'Save' }}
+    </button>
+  </div>
+</div>
+<!-- ───────────────────────────────────────────────────────────────────────── -->
+
+<!-- ── Add Set ───────────────────────────────────────────────────────────── -->
+<div class="qa-section add-set-section">
+  <div class="qa-header">
+    <span class="qa-title">Add Set</span>
+  </div>
+  <div class="add-set-buttons">
+    <button class="toolbar-btn add-btn" (click)="openAddSet()">Add Set</button>
+    <button class="toolbar-btn delete-btn" (click)="openDeleteSet()">Delete Set</button>
+    <button class="toolbar-btn" (click)="openEditSetName()">Edit Set Name</button>
+    <button class="toolbar-btn" (click)="openViewSets()">View Sets</button>
+  </div>
+</div>
+<!-- ───────────────────────────────────────────────────────────────────────── -->
+
+<!-- ── Add Set Modal ──────────────────────────────────────────────────────── -->
+<div class="sl-modal-overlay modal-overlay" *ngIf="showAddSetModal" (click)="cancelAddSet()">
+  <div class="sl-modal modal" role="dialog" aria-modal="true"
+       aria-labelledby="add-set-modal-title"
+       (click)="$event.stopPropagation()">
+    <h3 id="add-set-modal-title" class="sl-modal-title">New Set</h3>
+    <p class="sl-modal-subtitle">Both fields are required. All books in the set will share the Collection Group ID.</p>
+    <div class="sl-modal-field">
+      <label for="add-set-name">Set Name</label>
+      <input type="text" id="add-set-name" [(ngModel)]="addSetName" placeholder="e.g. Amazing Spider-Man Run" maxlength="256"
+             aria-describedby="add-set-error"
+             [attr.aria-invalid]="addSetError ? 'true' : null" />
+    </div>
+    <div class="sl-modal-field">
+      <label for="add-set-group">Collection Group ID</label>
+      <input type="number" id="add-set-group" [(ngModel)]="addSetCollectionGroup" min="1" max="9999" placeholder="e.g. 5" [readonly]="addSetGroupAutoSet"
+             aria-describedby="add-set-group-conflict add-set-group-invalid add-set-group-hint"
+             [attr.aria-invalid]="(addSetGroupConflict || (addSetCollectionGroup != null && addSetGroupInvalid)) ? 'true' : null" />
+      <span *ngIf="addSetGroupAutoSet" id="add-set-group-hint" class="sl-field-hint">Auto-assigned — next available ID</span>
+    </div>
+    <div *ngIf="addSetGroupConflict" id="add-set-group-conflict" role="alert" class="qa-error">Group {{ addSetCollectionGroup }} already exists. Choose a different number.</div>
+    <div *ngIf="addSetCollectionGroup != null && addSetGroupInvalid && !addSetGroupConflict" id="add-set-group-invalid" role="alert" class="qa-error">Number must be between 1 and 9999.</div>
+    <div *ngIf="addSetError" id="add-set-error" role="alert" class="qa-error">{{ addSetError }}</div>
+    <div class="sl-modal-actions">
+      <button class="qa-btn qa-btn-save" (click)="confirmAddSet()"
+        [disabled]="!addSetName.trim() || addSetGroupInvalid || addSetGroupConflict || addSetSaving">
+        {{ addSetSaving ? 'Saving…' : 'Create Set' }}
+      </button>
+      <button class="qa-btn qa-btn-reset" (click)="cancelAddSet()">Cancel</button>
+    </div>
+  </div>
+</div>
+<!-- ───────────────────────────────────────────────────────────────────────── -->
+
+
+<!-- ── Delete Set Modal ───────────────────────────────────────────────────── -->
+<div class="sl-modal-overlay modal-overlay" *ngIf="showDeleteSetModal" (click)="cancelDeleteSet()">
+  <div class="sl-modal sl-modal-wide modal modal--lg" role="dialog" aria-modal="true"
+       aria-labelledby="delete-set-modal-title"
+       (click)="$event.stopPropagation()">
+
+    <!-- No set selected yet: pick a set -->
+    <ng-container *ngIf="!deleteSetSelected">
+      <h3 id="delete-set-modal-title" class="sl-modal-title">Delete Set — Select a Set</h3>
+      <p class="sl-modal-subtitle" *ngIf="deleteSetAvailableSets.length === 0">
+        No sets found.
+      </p>
+      <ul class="sl-item-list" *ngIf="deleteSetAvailableSets.length > 0">
+        <li *ngFor="let set of deleteSetAvailableSets; trackBy: trackBySetId"
+            class="sl-item-row"
+            (click)="selectSetForDelete(set)">
+          <span class="sl-item-badge">Group {{ set.collectionGroup }}</span>
+          <span class="sl-item-name">{{ set.title }}</span>
+        </li>
+      </ul>
+      <div class="sl-modal-actions">
+        <button class="qa-btn qa-btn-reset" (click)="cancelDeleteSet()">Cancel</button>
+      </div>
+    </ng-container>
+
+    <!-- Set selected: action buttons -->
+    <ng-container *ngIf="deleteSetSelected && !deleteSetConfirmFull">
+      <h3 id="delete-set-modal-title" class="sl-modal-title">Delete "{{ deleteSetSelected.title }}"</h3>
+      <p class="sl-modal-subtitle">Group {{ deleteSetSelected.collectionGroup }}</p>
+      <div *ngIf="deleteSetError" class="qa-error">{{ deleteSetError }}</div>
+      <div class="sl-modal-actions">
+        <button class="qa-btn qa-btn-back" (click)="deleteSetSelected = null" [disabled]="deleteSetSaving">← Back</button>
+        <button class="qa-btn qa-btn-reset" (click)="cancelDeleteSet()" [disabled]="deleteSetSaving">Cancel</button>
+        <button class="qa-btn qa-btn-save" style="background:#e67e22;color:#fff" (click)="confirmDeleteSet()" [disabled]="deleteSetSaving">
+          {{ deleteSetSaving ? 'Deleting…' : 'Return to Selling' }}
+        </button>
+        <button class="qa-btn" style="background:#c0392b;color:#fff" (click)="requestFullDelete()" [disabled]="deleteSetSaving">
+          Full Delete
+        </button>
+      </div>
+    </ng-container>
+
+    <!-- Full Delete confirmation -->
+    <ng-container *ngIf="deleteSetSelected && deleteSetConfirmFull">
+      <h3 id="delete-set-modal-title" class="sl-modal-title">Confirm Full Delete</h3>
+      <p class="sl-modal-subtitle">Group {{ deleteSetSelected.collectionGroup }} — "{{ deleteSetSelected.title }}"</p>
+      <p class="sl-modal-hint" style="color:#f87171">
+        This will permanently delete the set container <strong>and all member comics</strong> from the database. This cannot be undone.
+      </p>
+      <div *ngIf="deleteSetError" class="qa-error">{{ deleteSetError }}</div>
+      <div class="sl-modal-actions">
+        <button class="qa-btn qa-btn-back" (click)="deleteSetConfirmFull = false" [disabled]="deleteSetSaving">← Back</button>
+        <button class="qa-btn qa-btn-reset" (click)="cancelDeleteSet()" [disabled]="deleteSetSaving">Cancel</button>
+        <button class="qa-btn" style="background:#c0392b;color:#fff" (click)="confirmDeleteSetFully()" [disabled]="deleteSetSaving">
+          {{ deleteSetSaving ? 'Deleting…' : 'Yes, Delete Everything' }}
+        </button>
+      </div>
+    </ng-container>
+
+  </div>
+</div>
+<!-- ───────────────────────────────────────────────────────────────────────── -->
+
+<!-- ── Edit Set Name Modal ─────────────────────────────────────────────────── -->
+<div class="sl-modal-overlay modal-overlay" *ngIf="showEditSetNameModal" (click)="cancelEditSetName()">
+  <div class="sl-modal sl-modal-wide modal modal--lg" role="dialog" aria-modal="true"
+       aria-labelledby="edit-set-name-modal-title"
+       (click)="$event.stopPropagation()">
+
+    <!-- Step 1: pick a set -->
+    <ng-container *ngIf="editSetNameStep === 1">
+      <h3 id="edit-set-name-modal-title" class="sl-modal-title">Edit Set Name — Select a Set</h3>
+      <div *ngIf="editSetNameError" class="qa-error">{{ editSetNameError }}</div>
+      <p class="sl-modal-subtitle" *ngIf="editSetNameAvailableSets.length === 0 && !editSetNameError">No sets found.</p>
+      <ul class="sl-item-list" *ngIf="editSetNameAvailableSets.length > 0">
+        <li *ngFor="let set of editSetNameAvailableSets; trackBy: trackBySetId"
+            class="sl-item-row"
+            (click)="selectSetForRename(set)">
+          <span class="sl-item-badge">Group {{ set.collectionGroup }}</span>
+          <span class="sl-item-name">{{ set.title }}</span>
+        </li>
+      </ul>
+      <div class="sl-modal-actions">
+        <button class="qa-btn qa-btn-reset" (click)="cancelEditSetName()">Cancel</button>
+      </div>
+    </ng-container>
+
+    <!-- Step 2: enter new name -->
+    <ng-container *ngIf="editSetNameStep === 2">
+      <h3 id="edit-set-name-modal-title" class="sl-modal-title">Rename Set</h3>
+      <p class="sl-modal-subtitle">Group {{ editSetNameSelected?.collectionGroup }}</p>
+      <div class="sl-modal-field">
+        <label for="edit-set-name-input">New Set Name</label>
+        <input type="text" id="edit-set-name-input" [(ngModel)]="editSetNameNewName" maxlength="256" placeholder="Enter new name"
+               aria-describedby="edit-set-name-error"
+               [attr.aria-invalid]="editSetNameError ? 'true' : null" />
+      </div>
+      <div *ngIf="editSetNameError" id="edit-set-name-error" role="alert" class="qa-error">{{ editSetNameError }}</div>
+      <div class="sl-modal-actions">
+        <button class="qa-btn qa-btn-back" (click)="editSetNameStep = 1" [disabled]="editSetNameSaving">&#8592; Back</button>
+        <button class="qa-btn qa-btn-save" (click)="confirmEditSetName()"
+          [disabled]="!editSetNameNewName.trim() || editSetNameSaving">
+          {{ editSetNameSaving ? 'Saving…' : 'Save' }}
+        </button>
+        <button class="qa-btn qa-btn-reset" (click)="cancelEditSetName()" [disabled]="editSetNameSaving">Cancel</button>
+      </div>
+    </ng-container>
+
+  </div>
+</div>
+<!-- ───────────────────────────────────────────────────────────────────────── -->
+
+<!-- ── View Sets Modal ────────────────────────────────────────────────────── -->
+<div class="sl-modal-overlay modal-overlay" *ngIf="showViewSetsModal" (click)="showViewSetsModal = false">
+  <div class="sl-modal sl-modal-wide modal modal--lg" role="dialog" aria-modal="true"
+       aria-labelledby="view-sets-modal-title"
+       (click)="$event.stopPropagation()">
+    <h3 id="view-sets-modal-title" class="sl-modal-title">Existing Sets</h3>
+    <p class="sl-modal-subtitle" *ngIf="viewSetsLoading">Loading…</p>
+    <p class="sl-modal-subtitle" *ngIf="!viewSetsLoading && viewSetsList.length === 0 && !viewSetsError">No sets found.</p>
+    <div *ngIf="viewSetsError" class="qa-error">{{ viewSetsError }}</div>
+    <ul class="sl-item-list" *ngIf="viewSetsList.length > 0">
+      <li *ngFor="let set of viewSetsList; trackBy: trackBySetId" class="sl-item-row sl-item-row-plain">
+        <span class="sl-item-badge">Group {{ set.collectionGroup }}</span>
+        <span class="sl-item-name">{{ set.title }}</span>
+        <span class="sl-item-count" *ngIf="set.items?.length">{{ set.items!.length }} book{{ set.items!.length !== 1 ? 's' : '' }}</span>
+      </li>
+    </ul>
+    <div class="sl-modal-actions">
+      <button class="qa-btn qa-btn-reset" (click)="showViewSetsModal = false">Close</button>
+    </div>
+  </div>
+</div>
+<!-- ───────────────────────────────────────────────────────────────────────── -->
+

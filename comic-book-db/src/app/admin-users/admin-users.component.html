@@ -1,0 +1,117 @@
+<div class="admin-users">
+  <h2>Users</h2>
+
+  <div *ngIf="error" class="error-message">{{ error }}</div>
+  <div *ngIf="loading">Loading…</div>
+
+  <div *ngIf="!loading && existingUsers.length === 0 && !error">
+    No users yet.
+  </div>
+
+  <div class="user-card-list" *ngIf="existingUsers.length > 0">
+    <div class="user-card" *ngFor="let user of existingUsers; trackBy: trackById">
+      <div class="user-card-header">
+        <span class="status-badge"
+          [class.badge-active]="user.status === 'APPROVED'"
+          [class.badge-suspended]="user.status === 'SUSPENDED'">
+          {{ user.status === 'APPROVED' ? 'Active' : 'Suspended' }}
+        </span>
+        <span *ngIf="user.isAdmin" class="admin-label">Admin</span>
+        <div class="user-card-actions">
+          <button *ngIf="!user.isAdmin && user.status === 'APPROVED'" class="btn-suspend" (click)="suspend(user)">Suspend</button>
+          <button *ngIf="!user.isAdmin && user.status === 'SUSPENDED'" class="btn-reactivate" (click)="reactivate(user)">Reactivate</button>
+        </div>
+      </div>
+      <div class="user-props-grid">
+        <div class="user-prop">
+          <span class="prop-label">Name</span>
+          <span class="prop-value">{{ user.name }}</span>
+        </div>
+        <div class="user-prop">
+          <span class="prop-label">Email</span>
+          <span class="prop-value">{{ user.email }}</span>
+        </div>
+        <div class="user-prop">
+          <span class="prop-label">Phone</span>
+          <span class="prop-value">{{ user.phone || '—' }}</span>
+        </div>
+        <div class="user-prop">
+          <span class="prop-label">Address</span>
+          <span class="prop-value">
+            <ng-container *ngIf="user.shippingAddress">
+              {{ user.shippingAddress.street1 }}{{ user.shippingAddress.street2 ? ', ' + user.shippingAddress.street2 : '' }},
+              {{ user.shippingAddress.city }}, {{ user.shippingAddress.state }} {{ user.shippingAddress.zip }}
+            </ng-container>
+            <ng-container *ngIf="!user.shippingAddress">—</ng-container>
+          </span>
+        </div>
+        <div class="user-prop">
+          <span class="prop-label">Approved</span>
+          <span class="prop-value">{{ user.approvedDate | date:'shortDate' }}</span>
+        </div>
+        <div class="user-prop">
+          <span class="prop-label">Venmo</span>
+          <span class="prop-value">{{ user.venmoHandle ? '@' + user.venmoHandle : '—' }}</span>
+        </div>
+        <div class="user-prop">
+          <span class="prop-label">PayPal</span>
+          <span class="prop-value">{{ user.paypalHandle ? '@' + user.paypalHandle : '—' }}</span>
+        </div>
+        <div class="user-prop">
+          <span class="prop-label">Cash App</span>
+          <span class="prop-value">{{ user.cashAppHandle ? '$' + user.cashAppHandle : '—' }}</span>
+        </div>
+        <div class="user-prop">
+          <span class="prop-label">eBay</span>
+          <span class="prop-value">{{ user.ebayUsername || '—' }}</span>
+        </div>
+      </div>
+      <div class="user-notes-row" *ngIf="user.preferences">
+        <span class="prop-label">Preferences</span>
+        <span class="prop-value">{{ user.preferences }}</span>
+      </div>
+      <div class="user-notes-row" *ngIf="user.notes">
+        <span class="prop-label">Notes</span>
+        <span class="prop-value">{{ user.notes }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reset View Counts -->
+  <div class="section-divider"></div>
+  <h3>Reset Counts</h3>
+  <p class="reset-warning">Resets the view count on all comics back to zero.</p>
+
+  <div *ngIf="resetCountsSuccess" class="success-message">{{ resetCountsSuccess }}</div>
+  <div *ngIf="resetCountsError" class="error-message">{{ resetCountsError }}</div>
+
+  <button
+    class="btn-secondary"
+    [disabled]="resetCountsInProgress"
+    (click)="resetViewCounts()">
+    {{ resetCountsInProgress ? 'Resetting…' : 'Reset View Counts' }}
+  </button>
+
+  <!-- Database Reset -->
+  <div class="section-divider"></div>
+  <h3 class="danger-title">Reset Database</h3>
+  <p class="reset-warning">
+    This will permanently delete all comics, images, shopping carts, discounts, and user sessions (except yours).
+    Fulfilled order history will be preserved. This action cannot be undone.
+  </p>
+
+  <div *ngIf="resetSuccess" class="success-message">{{ resetSuccess }}</div>
+  <div *ngIf="resetError" id="reset-confirm-error" role="alert" class="error-message reset-error-message">{{ resetError }}</div>
+
+  <div class="reset-confirm-row">
+    <input type="text" [(ngModel)]="resetConfirmText" placeholder='Type "RESET" to confirm' class="reset-confirm-input"
+           aria-describedby="reset-confirm-error"
+           [attr.aria-invalid]="resetError ? 'true' : null" />
+    <button
+      class="btn-danger"
+      [disabled]="resetConfirmText !== 'RESET' || resetInProgress"
+      (click)="resetDatabase()">
+      {{ resetInProgress ? 'Resetting…' : 'Reset Database' }}
+    </button>
+  </div>
+</div>

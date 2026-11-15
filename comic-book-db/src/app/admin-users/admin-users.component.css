@@ -1,0 +1,247 @@
+.admin-users { padding: 24px; }
+
+table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+th, td { padding: 10px 12px; border: 1px solid var(--color-border); text-align: left; color: var(--color-text); }
+th { background: #adc178; font-weight: bold; }
+
+button { padding: 6px 14px; cursor: pointer; }
+
+.error-message { color: var(--color-danger); margin-bottom: var(--space-3); }
+
+.section-heading { margin-top: 40px; }
+
+/* (Removed dead .pin-modal-overlay / .pin-modal rules — Phase 2.4.
+   The pin-display modal markup is no longer present in the template.
+   Future pin dialogs should compose the shared .modal-overlay / .modal
+   classes from styles.css.) */
+
+/* admin-users status badges — soft-fill semantic, see .pill in styles.css. */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px var(--space-2);
+  border-radius: 12px;
+  font-size: var(--fs-12);
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+.badge-active    { background: var(--color-success-bg); color: var(--color-success); }
+.badge-suspended { background: var(--color-danger-bg);  color: var(--color-danger); }
+
+.action-cell { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.btn-suspend {
+  background: transparent;
+  color: var(--color-danger);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-sm);
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+  transition: background-color var(--duration-base) var(--ease-standard);
+}
+.btn-suspend:hover { background: var(--color-danger-bg); }
+
+.btn-reactivate {
+  background: transparent;
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+  transition: background-color var(--duration-base) var(--ease-standard);
+}
+.btn-reactivate:hover { background: rgba(79, 110, 47, 0.10); }
+
+.admin-label { font-style: italic; color: var(--color-text-muted); }
+
+/* Approved users card layout */
+.user-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.user-card {
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 10px 14px;
+  background: var(--color-surface, #f8f7f2);
+}
+
+.user-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.user-card-actions {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.user-props-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px 12px;
+}
+
+.user-prop {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.prop-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted, #888);
+  white-space: nowrap;
+}
+
+.prop-value {
+  font-size: 0.85rem;
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-notes-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.85rem;
+}
+
+.user-notes-row .prop-label {
+  white-space: nowrap;
+  padding-top: 1px;
+}
+
+.user-notes-row .prop-value {
+  white-space: normal;
+  overflow: visible;
+}
+
+.pin-display {
+  font-size: 2.5rem;
+  font-weight: bold;
+  letter-spacing: 0.3em;
+  margin: 16px 0;
+  font-family: monospace;
+  color: #7b8f4b;
+}
+
+.section-divider {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: 1.25rem 0;
+}
+
+.danger-title {
+  color: var(--color-danger);
+  margin-bottom: var(--space-2);
+}
+
+.reset-warning {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  max-width: 620px;
+}
+
+.reset-confirm-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
+
+.reset-confirm-input {
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  font-size: 0.95rem;
+  width: 220px;
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.btn-secondary {
+  padding: var(--space-2) var(--space-6);
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-14);
+  cursor: pointer;
+  font-weight: var(--fw-semibold);
+  transition:
+    background-color var(--duration-base) var(--ease-standard),
+    border-color     var(--duration-base) var(--ease-standard);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--color-surface-alt);
+  border-color: var(--color-primary);
+}
+
+.btn-secondary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Reset Database button: filled-danger to make the destructiveness obvious. */
+.btn-danger {
+  padding: var(--space-2) var(--space-6);
+  background: var(--color-danger);
+  color: var(--color-text-inverse);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-14);
+  cursor: pointer;
+  font-weight: var(--fw-semibold);
+  transition:
+    background-color var(--duration-base) var(--ease-standard),
+    border-color     var(--duration-base) var(--ease-standard);
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: var(--color-danger-hover);
+  border-color: var(--color-danger-hover);
+}
+
+.btn-danger:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.success-message {
+  color: var(--color-success);
+  background: var(--color-success-bg);
+  border: 1px solid rgba(92, 122, 58, 0.32);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+  margin-bottom: var(--space-3);
+  font-size: var(--fs-14);
+}
+
+.reset-error-message {
+  color: var(--color-danger);
+  margin-bottom: var(--space-3);
+  font-size: var(--fs-14);
+}

@@ -1,0 +1,120 @@
+<div class="orders-container">
+
+  <ng-container *ngIf="!auth.isAdmin()">
+    <app-cart></app-cart>
+    <div class="history-divider">
+      <span class="history-divider-label">Order History</span>
+    </div>
+  </ng-container>
+
+  <h2 *ngIf="auth.isAdmin()">My Orders</h2>
+
+  <div *ngIf="loading">Loading…</div>
+  <div *ngIf="error" class="error-message">{{ error }}</div>
+  <div *ngIf="!loading && !error && orders.length === 0" class="empty-state">
+    You have no completed orders yet.
+  </div>
+
+  <div *ngFor="let order of orders; trackBy: trackByOrderId" class="order-card">
+    <div class="order-header">
+      <div class="order-meta">
+        <span class="order-status">Fulfilled</span>
+        <span *ngIf="order.invoiceNumber" class="order-invoice">Order #{{ order.invoiceNumber }}</span>
+        <span class="order-date">Ordered: {{ order.createdAt | date:'mediumDate' }}</span>
+        <span *ngIf="order.fulfilledAt" class="order-date">Shipped: {{ order.fulfilledAt | date:'mediumDate' }}</span>
+      </div>
+      <div class="order-total">{{ orderTotal(order) | currency }}</div>
+    </div>
+
+    <table>
+      <thead>
+        <tr><th>Comic</th><th>Price</th><th>Claimed</th></tr>
+      </thead>
+      <tbody>
+        <ng-container *ngFor="let row of groupedRows(order); trackBy: trackByRow">
+          <!-- Single comic: one row -->
+          <tr *ngIf="row.type === 'single'">
+            <td>{{ row.items[0].comicTitle }}{{ row.items[0].comicNumber ? ' ' + row.items[0].comicNumber : '' }}</td>
+            <td>
+              <ng-container *ngIf="showItemDiscounts(order); else plainPrice">
+                <span class="price-original">{{ row.items[0].price | currency }}</span>
+                <span *ngIf="discountedItemPrice(order, row.items[0]) === 0" class="price-free-badge">FREE</span>
+                <span *ngIf="discountedItemPrice(order, row.items[0]) !== 0" class="price-discounted">{{ discountedItemPrice(order, row.items[0]) | currency }}</span>
+              </ng-container>
+              <ng-template #plainPrice>{{ row.items[0].price | currency }}</ng-template>
+            </td>
+            <td>{{ row.claimedAt | date:'mediumDate' }}</td>
+          </tr>
+          <!-- Set: header row then one row per member comic -->
+          <ng-container *ngIf="row.type === 'set'">
+            <tr class="set-header-row">
+              <td>
+                <span class="set-header-link">{{ row.containerTitle ?? row.items[0].comicTitle }}</span>
+                <span class="set-tag">Set {{ row.collectionGroup }}</span>
+              </td>
+              <td class="set-total-price">
+                <ng-container *ngIf="showItemDiscounts(order)">
+                  <span class="price-original">{{ row.totalPrice | currency }}</span>
+                  <span class="price-discounted">{{ discountedSetTotal(order, row) | currency }}</span>
+                </ng-container>
+                <span *ngIf="!showItemDiscounts(order)">{{ row.totalPrice | currency }}</span>
+              </td>
+              <td>{{ row.claimedAt | date:'mediumDate' }}</td>
+            </tr>
+            <tr *ngFor="let comic of row.items; trackBy: trackByComicId" class="set-member-row">
+              <td class="set-member-comic">{{ comic.comicTitle }}{{ comic.comicNumber ? ' ' + comic.comicNumber : '' }}</td>
+              <td class="set-member-price">
+                <ng-container *ngIf="showItemDiscounts(order)">
+                  <span class="price-original">{{ comic.price | currency }}</span>
+                  <span *ngIf="discountedItemPrice(order, comic) === 0" class="price-free-badge">FREE</span>
+                  <span *ngIf="discountedItemPrice(order, comic) !== 0" class="price-discounted">{{ discountedItemPrice(order, comic) | currency }}</span>
+                </ng-container>
+                <span *ngIf="!showItemDiscounts(order)">{{ comic.price | currency }}</span>
+              </td>
+              <td></td>
+            </tr>
+          </ng-container>
+        </ng-container>
+      </tbody>
+      <tfoot>
+        <tr *ngIf="(order.discountAmount && order.discountAmount > 0) || (order.shippingCost && order.shippingCost > 0)">
+          <td>Subtotal <span class="item-count-label">({{ bookCount(order) }} book{{ bookCount(order) !== 1 ? 's' : '' }})</span></td>
+          <td>{{ orderSubtotal(order) | currency }}</td>
+          <td></td>
+        </tr>
+        <tr *ngIf="order.discountAmount && order.discountAmount > 0">
+          <td>Discount</td>
+          <td class="discount-savings">-{{ order.discountAmount | currency }}
+            <span *ngIf="order.discountDescription" class="discount-desc">({{ order.discountDescription }})</span>
+          </td>
+          <td></td>
+        </tr>
+        <tr *ngIf="order.shippingCost && order.shippingCost > 0">
+          <td>Shipping</td>
+          <td class="shipping-cost">{{ order.shippingCost | currency }}</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><strong>Total</strong></td>
+          <td><strong>{{ orderTotal(order) | currency }}</strong></td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <div *ngIf="order.trackingNumber" class="order-info tracking-panel">
+      <span class="info-label">Tracking #:</span>
+      <span class="info-value">{{ order.trackingNumber }}</span>
+    </div>
+
+    <div *ngIf="order.adminNotes" class="order-info seller-notes-panel">
+      <span class="info-label">Seller notes:</span>
+      <p class="info-value">{{ order.adminNotes }}</p>
+    </div>
+
+    <div *ngIf="order.customerNotes" class="order-info customer-notes-panel">
+      <span class="info-label">Your notes:</span>
+      <p class="info-value">{{ order.customerNotes }}</p>
+    </div>
+  </div>
+</div>

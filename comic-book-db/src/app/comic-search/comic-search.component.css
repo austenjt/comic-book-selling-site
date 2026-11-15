@@ -1,0 +1,66 @@
+.filter-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+input {
+  padding: .5rem;
+  width: 100%;
+  max-width: 300px;
+  box-sizing: border-box;
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+input:focus {
+  outline: none;
+  border-color: #7b8f4b;
+  box-shadow: 0 0 0 3px rgba(123,143,75,0.2);
+}
+
+
+.btn-filter,
+.btn-clear {
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition:
+    background-color var(--duration-base) var(--ease-standard),
+    border-color     var(--duration-base) var(--ease-standard),
+    color            var(--duration-base) var(--ease-standard);
+}
+
+.btn-filter {
+  background: rgba(240, 234, 210, 0.65);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+
+.btn-filter:hover:not(:disabled) {
+  background: var(--parchment);
+  border-color: var(--color-border-strong);
+}
+
+.btn-filter:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-clear {
+  background: var(--sage);
+  color: var(--color-text);
+  border: 1px solid var(--olive-dark);
+  box-shadow: inset 0 -2px 0 var(--olive-dark);
+}
+
+.btn-clear:hover {
+  background: var(--olive);
+  color: var(--color-text-inverse);
+}

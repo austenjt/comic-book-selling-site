@@ -1,0 +1,94 @@
+<app-selling-header
+  [itemCount]="displayComics.length"
+  [totalCount]="totalCount"
+  [currentPage]="currentPage"
+  [totalPages]="totalPages"
+  [isFilterActive]="isFilterActive"
+  [(sortOrder)]="sortOrder"
+  [(expandAll)]="expandAll"
+  (goToPage)="goToPage($event)"
+  (filterApplied)="applyFilter($event)"
+  (filterCleared)="clearFilter()">
+</app-selling-header>
+
+<!-- Award modal -->
+<div *ngIf="awardingComic" class="award-modal-overlay modal-overlay" (click)="closeAwardModal()">
+  <div class="award-modal modal modal--lg" role="dialog" aria-modal="true"
+       aria-labelledby="award-modal-title"
+       (click)="$event.stopPropagation()">
+    <h3 id="award-modal-title" class="modal__title">Award "{{ awardingComic.title }}"</h3>
+    <p class="award-subtitle">Select a user to add this book to their cart at $0.00:</p>
+    <div *ngIf="awardError" id="award-error" role="alert" class="award-error">{{ awardError }}</div>
+    <div *ngIf="awardLoading" class="award-loading">Awarding…</div>
+    <ul class="award-user-list" role="radiogroup" aria-label="Select user to award"
+        [attr.aria-describedby]="awardError ? 'award-error' : null"
+        [attr.aria-invalid]="awardError ? 'true' : null">
+      <li *ngFor="let user of approvedUsers" class="award-user-row">
+        <label class="award-radio-label">
+          <input type="radio" name="awardUser" [value]="user.id" [(ngModel)]="selectedUserId" [disabled]="awardLoading" />
+          <span class="award-user-name">{{ user.name }}</span>
+          <span class="award-user-email">{{ user.email }}</span>
+        </label>
+      </li>
+    </ul>
+    <div class="award-modal-actions">
+      <button class="award-confirm-btn" (click)="confirmAward()" [disabled]="!selectedUserId || awardLoading">Award</button>
+      <button class="award-cancel-btn" (click)="closeAwardModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="claimError" class="claim-error">{{ claimError }}</div>
+
+<div *ngIf="loading" class="warming-up">
+  <div class="warming-up-spinner"></div>
+  <span>Please wait while things warm up. This site is not always on, and turns on when visited.</span>
+</div>
+
+<div *ngIf="!auth.isLoggedIn()" class="selling-login-banner">
+  <a routerLink="/login">Log in</a> or create an account to claim items and add them to your cart. Discounts apply when you submit your order!
+</div>
+
+<div class="comics-list">
+  <app-selling-card
+    *ngFor="let comic of displayComics; trackBy: trackById"
+    [comic]="comic"
+    [isInMyCart]="isInMyCart(comic.id)"
+    [isClaimedByOther]="isClaimedByOther(comic.id)"
+    [isSetInMyCart]="isSetInMyCart(comic)"
+    [isSetClaimedByOther]="isSetClaimedByOther(comic)"
+    [canClaim]="canClaim(comic)"
+    [canClaimSet]="canClaimSet(comic)"
+    [showClaimButton]="showClaimButton(comic)"
+    [showClaimSetButton]="showClaimSetButton(comic)"
+    [claimedDate]="claimedDate(comic.id)"
+    [cartLockedTitle]="cartLockedTitle()"
+    [isClaimingSet]="claimingSetId === comic.id"
+    [isCopying]="copyingId === comic.id"
+    [isCopied]="copiedId === comic.id"
+    [isDeleting]="deletingId === comic.id"
+    [isApproved]="auth.isApproved()"
+    [isAdmin]="auth.isAdmin()"
+    [awardModeEnabled]="configService.awardModeEnabled"
+    [expanded]="expandAll || expandedComicId === comic.id"
+    (expandRequested)="expandedComicId = comic.id"
+    (claimRequested)="claim(comic)"
+    (claimSetRequested)="claim(comic)"
+    (markForSaleRequested)="markForSale(comic)"
+    (copyRequested)="copyComic(comic)"
+    (awardRequested)="openAwardModal(comic)">
+  </app-selling-card>
+</div>
+
+<app-pagination-bar
+  *ngIf="!isFilterActive"
+  [currentPage]="currentPage"
+  [totalPages]="totalPages"
+  (goToPage)="goToPage($event)">
+</app-pagination-bar>
+
+<footer class="selling-footer">
+  <div class="footer-main-row">
+    <span class="footer-address">Anytown, ST 12345 USA</span>
+  </div>
+</footer>

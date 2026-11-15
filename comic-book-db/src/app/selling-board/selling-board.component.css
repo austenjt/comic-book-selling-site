@@ -1,0 +1,163 @@
+.selling-login-banner {
+  background: #fff3e0;
+  border: 1px solid #ffb74d;
+  border-left: 4px solid #fb8c00;
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.9rem;
+  color: #5c3a00;
+}
+
+.selling-login-banner a {
+  color: #e65100;
+  font-weight: 600;
+}
+
+.comics-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 0;
+  margin: 0;
+}
+
+.comics-list app-selling-card {
+  width: calc((100% - 80px) / 6);
+}
+
+@media screen and (max-width: 900px) {
+  .comics-list app-selling-card {
+    width: calc((100% - 48px) / 4);
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .comics-list app-selling-card {
+    width: calc(50% - 8px);
+  }
+}
+
+@media screen and (max-width: 400px) {
+  .comics-list { gap: var(--space-3); }
+  .comics-list app-selling-card {
+    width: 100%;
+  }
+}
+
+.claim-error {
+  color: var(--color-danger);
+  text-align: center;
+  margin-bottom: var(--space-3);
+}
+
+/* ── Award modal ────────────────────────────────────────────────────────────── */
+
+.award-modal {
+  background: var(--sage-light);
+}
+
+.award-subtitle {
+  font-size: 0.88rem;
+  color: #79675c;
+  margin-bottom: 16px;
+}
+
+.award-user-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+  max-height: 260px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.award-user-row {
+  border: 1px solid #b8c89a;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.award-radio-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  background: #f0ead2;
+  color: #6c584c;
+  font-size: 0.9rem;
+  transition: background 0.15s;
+}
+.award-radio-label:hover { background: #c8d4a8; }
+.award-radio-label input[type="radio"] { cursor: pointer; flex-shrink: 0; }
+
+.award-user-name { font-weight: 500; color: #6c584c; }
+
+.award-user-email {
+  font-size: 0.78rem;
+  color: #79675c;
+}
+
+.award-modal-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.award-confirm-btn {
+  padding: 8px 22px;
+  border-radius: 4px;
+  border: none;
+  background: #7b8f4b;
+  color: #f0ead2;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.award-confirm-btn:hover:not(:disabled) { background: #6b7e3e; }
+.award-confirm-btn:disabled { background: #c8d4a8; color: #79675c; cursor: not-allowed; }
+
+.award-cancel-btn {
+  padding: 8px 22px;
+  border-radius: 4px;
+  border: 1px solid #b8c89a;
+  background: transparent;
+  color: #79675c;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.award-cancel-btn:hover { background: #c8d4a8; }
+
+.award-error {
+  color: var(--color-danger);
+  font-size: 0.88rem;
+  margin-bottom: 10px;
+}
+
+.award-loading {
+  color: #79675c;
+  font-size: 0.88rem;
+  margin-bottom: 10px;
+}
+
+/* ── Selling Page Footer ────────────────────────────────────────────────────── */
+
+.selling-footer {
+  margin-top: 2rem;
+  padding: 0.75rem 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.footer-main-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.footer-address {
+  font-size: 0.78rem;
+  color: var(--color-text-muted, #888);
+}
