@@ -1,6 +1,6 @@
 # Comic Book Selling Site
 
-A full-stack web application for managing a personal comic book collection and running **claim sales** — a selling format where buyers claim items from a posted list on a first-come, first-served basis.
+A full-stack web application for managing a personal comic book collection that you want to sell.
 
 ![Dashboard screenshot](./claim-sale.png)
 
